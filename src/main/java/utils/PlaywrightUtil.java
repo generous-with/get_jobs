@@ -914,6 +914,31 @@ public class PlaywrightUtil {
     }
 
     /**
+     * 检查页面是否仍然有效
+     *
+     * @param deviceType 设备类型
+     * @return 页面是否有效
+     */
+    public static boolean isPageValid(DeviceType deviceType) {
+        try {
+            Page page = getPage(deviceType);
+            // 检查页面是否已关闭
+            return page != null && !page.isClosed();
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    /**
+     * 使用默认设备类型检查页面是否仍然有效
+     *
+     * @return 页面是否有效
+     */
+    public static boolean isPageValid() {
+        return isPageValid(defaultDeviceType);
+    }
+
+    /**
      * 带错误消息的元素查找（从SeleniumUtil移植）
      *
      * @param selector    元素选择器

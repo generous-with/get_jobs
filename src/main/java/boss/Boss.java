@@ -174,6 +174,15 @@ public class Boss {
                 String[] bossInfo = splitBossName(bossNameRaw);
                 String bossName = bossInfo[0];
                 String bossActive = bossInfo[1];
+                
+                // 检查HR是否为不活跃状态，如果是则跳过该岗位
+                if (isDeadHR(page)) {
+                    log.info("检测到HR状态不活跃，跳过该岗位: {}", jobName);
+                    // 关闭详情页，回到主页面
+                    page.close();
+                    continue;
+                }
+                
                 if (config.getDeadStatus().stream().anyMatch(bossActive::contains)) continue;
                 // Boss公司/职位
                 String bossTitleRaw = safeText(detailBox, "div[class*='boss-info-attr']");
@@ -411,120 +420,135 @@ public class Boss {
 
     @SneakyThrows
     private static void resumeSubmission(com.microsoft.playwright.Page page, String keyword, Job job) {
-        PlaywrightUtil.sleep(1);
-
-        // 1. 查找“查看更多信息”按钮（必须存在且新开页）
-        Locator moreInfoBtn = page.locator("a.more-job-btn");
-        if (moreInfoBtn.count() == 0) {
-            log.warn("未找到“查看更多信息”按钮，跳过...");
-            return;
-        }
-        // 强制用js新开tab
-        String href = moreInfoBtn.first().getAttribute("href");
-        if (href == null || !href.startsWith("/job_detail/")) {
-            log.warn("未获取到岗位详情链接，跳过...");
-            return;
-        }
-        String detailUrl = "https://www.zhipin.com" + href;
-
-        // 2. 新开详情页
-        com.microsoft.playwright.Page detailPage = page.context().newPage();
-        detailPage.navigate(detailUrl);
-        PlaywrightUtil.sleep(1); // 页面加载
-
-        // 3. 查找“立即沟通”按钮
-        Locator chatBtn = detailPage.locator("a.btn-startchat, a.op-btn-chat");
-        boolean foundChatBtn = false;
-        for (int i = 0; i < 5; i++) {
-            if (chatBtn.count() > 0 && (chatBtn.first().textContent().contains("立即沟通"))) {
-                foundChatBtn = true;
-                break;
-            }
+        com.microsoft.playwright.Page detailPage = null;
+        try {
             PlaywrightUtil.sleep(1);
-        }
-        if (!foundChatBtn) {
-            log.warn("未找到立即沟通按钮，跳过岗位: {}", job.getJobName());
-            detailPage.close();
-            return;
-        }
-        chatBtn.first().click();
-        PlaywrightUtil.sleep(1);
 
-        // 4. 等待聊天输入框
-        Locator inputLocator = detailPage.locator("div#chat-input.chat-input[contenteditable='true'], textarea.input-area");
-        boolean inputReady = false;
-        for (int i = 0; i < 10; i++) {
-            if (inputLocator.count() > 0 && inputLocator.first().isVisible()) {
-                inputReady = true;
-                break;
+            // 1. 查找"查看更多信息"按钮（必须存在且新开页）
+            Locator moreInfoBtn = page.locator("a.more-job-btn");
+            if (moreInfoBtn.count() == 0) {
+                log.warn("未找到\"查看更多信息\"按钮，跳过...");
+                return;
             }
-            PlaywrightUtil.sleep(1);
-        }
-        if (!inputReady) {
-            log.warn("聊天输入框未出现，跳过: {}", job.getJobName());
-            detailPage.close();
-            return;
-        }
-
-        // 5. AI智能生成打招呼语
-        AiFilter aiResult = null;
-        if (config.getEnableAI()) {
-            String jd = job.getJobInfo();
-            if (jd != null && !jd.isEmpty()) {
-                aiResult = checkJob(keyword, job.getJobName(), jd);
+            // 强制用js新开tab
+            String href = moreInfoBtn.first().getAttribute("href");
+            if (href == null || !href.startsWith("/job_detail/")) {
+                log.warn("未获取到岗位详情链接，跳过...");
+                return;
             }
-        }
-        String sayHi = config.getSayHi().replaceAll("[\\r\\n]", "");
-        String message = (aiResult != null && aiResult.getResult() && isValidString(aiResult.getMessage()))
-                ? aiResult.getMessage() : sayHi;
+            String detailUrl = "https://www.zhipin.com" + href;
 
-        // 6. 输入打招呼语
-        Locator input = inputLocator.first();
-        input.click();
-        if (input.evaluate("el => el.tagName.toLowerCase()") instanceof String tag && tag.equals("textarea")) {
-            input.fill(message);
-        } else {
-            input.evaluate("(el, msg) => el.innerText = msg", message);
-        }
+            // 2. 新开详情页
+            detailPage = page.context().newPage();
+            detailPage.navigate(detailUrl);
+            PlaywrightUtil.sleep(1); // 页面加载
 
-        // 7. 发送图片简历（可选）
-        boolean imgResume = false;
-        if (config.getSendImgResume()) {
-            try {
-                URL resourceUrl = Boss.class.getResource("/resume.jpg");
-                if (resourceUrl != null) {
-                    File imageFile = new File(resourceUrl.toURI());
-                    Locator fileInput = detailPage.locator("//div[@aria-label='发送图片']//input[@type='file']");
-                    if (fileInput.count() > 0) {
-                        fileInput.setInputFiles(imageFile.toPath());
-                        imgResume = true;
-                    }
+            // 3. 查找"立即沟通"按钮
+            Locator chatBtn = detailPage.locator("a.btn-startchat, a.op-btn-chat");
+            boolean foundChatBtn = false;
+            for (int i = 0; i < 5; i++) {
+                if (chatBtn.count() > 0 && (chatBtn.first().textContent().contains("立即沟通"))) {
+                    foundChatBtn = true;
+                    break;
                 }
-            } catch (Exception e) {
-                log.error("发送图片简历失败: {}", e.getMessage());
+                PlaywrightUtil.sleep(1);
             }
-        }
-
-        // 8. 点击发送按钮（div.send-message 或 button.btn-send）
-        Locator sendBtn = detailPage.locator("div.send-message, button[type='send'].btn-send, button.btn-send");
-        boolean sendSuccess = false;
-        if (sendBtn.count() > 0) {
-            sendBtn.first().click();
+            if (!foundChatBtn) {
+                log.warn("未找到立即沟通按钮，跳过岗位: {}", job.getJobName());
+                return;
+            }
+            chatBtn.first().click();
             PlaywrightUtil.sleep(1);
-            sendSuccess = true;
-        } else {
-            log.warn("未找到发送按钮，自动跳过！岗位：{}", job.getJobName());
-        }
 
-        log.info("投递完成 | 岗位：{} | 招呼语：{} | 图片简历：{}", job.getJobName(), message, imgResume ? "已发送" : "未发送");
+            // 4. 等待聊天输入框
+            Locator inputLocator = detailPage.locator("div#chat-input.chat-input[contenteditable='true'], textarea.input-area");
+            boolean inputReady = false;
+            for (int i = 0; i < 10; i++) {
+                if (inputLocator.count() > 0 && inputLocator.first().isVisible()) {
+                    inputReady = true;
+                    break;
+                }
+                PlaywrightUtil.sleep(1);
+            }
+            if (!inputReady) {
+                log.warn("聊天输入框未出现，跳过: {}", job.getJobName());
+                return;
+            }
 
-        // 9. 关闭详情页，回到主页面
-        detailPage.close();
-        PlaywrightUtil.sleep(1);
+            // 5. AI智能生成打招呼语
+            AiFilter aiResult = null;
+            if (config.getEnableAI()) {
+                String jd = job.getJobInfo();
+                if (jd != null && !jd.isEmpty()) {
+                    aiResult = checkJob(keyword, job.getJobName(), jd);
+                }
+            }
+            String sayHi = config.getSayHi().replaceAll("[\\r\\n]", "");
+            String message = (aiResult != null && aiResult.getResult() && isValidString(aiResult.getMessage()))
+                    ? aiResult.getMessage() : sayHi;
 
-        // 10. 成功投递加入结果
-        if (sendSuccess) {
-            resultList.add(job);
+            // 6. 输入打招呼语
+            Locator input = inputLocator.first();
+            input.click();
+            if (input.evaluate("el => el.tagName.toLowerCase()") instanceof String tag && tag.equals("textarea")) {
+                input.fill(message);
+            } else {
+                input.evaluate("(el, msg) => el.innerText = msg", message);
+            }
+
+            // 7. 发送图片简历（可选）
+            boolean imgResume = false;
+            if (config.getSendImgResume()) {
+                try {
+                    URL resourceUrl = Boss.class.getResource("/resume.jpg");
+                    if (resourceUrl != null) {
+                        File imageFile = new File(resourceUrl.toURI());
+                        Locator fileInput = detailPage.locator("//div[@aria-label='发送图片']//input[@type='file']");
+                        if (fileInput.count() > 0) {
+                            fileInput.setInputFiles(imageFile.toPath());
+                            imgResume = true;
+                        }
+                    }
+                } catch (Exception e) {
+                    log.error("发送图片简历失败: {}", e.getMessage());
+                }
+            }
+
+            // 8. 点击发送按钮（div.send-message 或 button.btn-send）
+            Locator sendBtn = detailPage.locator("div.send-message, button[type='send'].btn-send, button.btn-send");
+            boolean sendSuccess = false;
+            if (sendBtn.count() > 0) {
+                sendBtn.first().click();
+                PlaywrightUtil.sleep(1);
+                sendSuccess = true;
+            } else {
+                log.warn("未找到发送按钮，自动跳过！岗位：{}", job.getJobName());
+            }
+
+            log.info("投递完成 | 岗位：{} | 招呼语：{} | 图片简历：{}", job.getJobName(), message, imgResume ? "已发送" : "未发送");
+
+            // 9. 成功投递加入结果
+            if (sendSuccess) {
+                resultList.add(job);
+            }
+        } catch (com.microsoft.playwright.PlaywrightException e) {
+            if (e.getMessage().contains("Target page, context or browser has been closed")) {
+                log.error("浏览器页面已关闭，无法继续操作岗位: {}", job.getJobName());
+            } else {
+                log.error("操作岗位时发生Playwright异常: {}", e.getMessage(), e);
+            }
+        } catch (Exception e) {
+            log.error("操作岗位时发生未知异常: {}", e.getMessage(), e);
+        } finally {
+            // 确保详情页被关闭
+            if (detailPage != null && !detailPage.isClosed()) {
+                try {
+                    detailPage.close();
+                } catch (Exception e) {
+                    log.warn("关闭详情页时发生异常: {}", e.getMessage());
+                }
+            }
+            PlaywrightUtil.sleep(1);
         }
     }
 
@@ -722,11 +746,18 @@ public class Boss {
     }
 
     private static AiFilter checkJob(String keyword, String jobName, String jd) {
-        AiConfig aiConfig = AiConfig.init();
-        String requestMessage = String.format(aiConfig.getPrompt(), aiConfig.getIntroduce(), keyword, jobName, jd,
-                config.getSayHi());
-        String result = AiService.sendRequest(requestMessage);
-        return result.contains("false") ? new AiFilter(false) : new AiFilter(true, result);
+        try {
+            AiConfig aiConfig = AiConfig.init();
+            String requestMessage = String.format(aiConfig.getPrompt(), aiConfig.getIntroduce(), keyword, jobName, jd,
+                    config.getSayHi());
+            log.info("开始AI岗位匹配检测 | 关键词: {} | 岗位名称: {}", keyword, jobName);
+            String result = AiService.sendRequest(requestMessage);
+            log.info("AI检测结果: {}", result);
+            return result.contains("false") ? new AiFilter(false) : new AiFilter(true, result);
+        } catch (Exception e) {
+            log.error("AI岗位检测异常: {}", e.getMessage(), e);
+            return new AiFilter(false);
+        }
     }
 
     private static Integer[] parseSalaryRange(String salaryText) {

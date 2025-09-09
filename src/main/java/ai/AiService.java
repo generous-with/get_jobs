@@ -23,13 +23,24 @@ import java.util.concurrent.*;
 @Slf4j
 public class AiService {
 
-    private static final Dotenv dotenv = Dotenv.load();
-    private static final String BASE_URL = dotenv.get("BASE_URL") + "/v1/chat/completions";
+    private static final Dotenv dotenv = Dotenv.configure()
+            .directory("/src/main/resources")
+            .ignoreIfMissing()
+            .load();
+    private static final String BASE_URL = (dotenv.get("BASE_URL") != null ? dotenv.get("BASE_URL") : "https://api.deepseek.com") + "/v1/chat/completions";
     private static final String API_KEY = dotenv.get("API_KEY");
-    private static final String MODEL = dotenv.get("MODEL");
-
+    private static final String MODEL = dotenv.get("MODEL") != null ? dotenv.get("MODEL") : "deepseek-chat";
 
     public static String sendRequest(String content) {
+        // 检查API_KEY是否存在
+        if (API_KEY == null || API_KEY.isEmpty()) {
+            log.warn("API_KEY未配置，跳过AI请求");
+            return "false";
+        }
+        
+        log.info("开始调用AI服务，使用模型: {}", MODEL);
+        log.debug("请求内容: {}", content);
+        
         // 设置超时时间，单位：秒
         int timeoutInSeconds = 60;  // 你可以修改这个变量来设置超时时间
 
@@ -41,7 +52,7 @@ public class AiService {
         // 构建 JSON 请求体
         JSONObject requestData = new JSONObject();
         requestData.put("model", MODEL);
-        requestData.put("temperature", 0.5);
+        requestData.put("temperature", 0.7);
 
         // 添加消息内容
         JSONArray messages = new JSONArray();
@@ -51,6 +62,8 @@ public class AiService {
         messages.put(message);
 
         requestData.put("messages", messages);
+        
+        log.debug("请求数据: {}", requestData.toString());
 
         // 构建 HTTP 请求
         HttpRequest request = HttpRequest.newBuilder()
@@ -69,10 +82,11 @@ public class AiService {
         try {
             // 使用 future.get 设置超时
             HttpResponse<String> response = future.get(timeoutInSeconds, TimeUnit.SECONDS);
+            log.info("AI服务响应状态码: {}", response.statusCode());
 
             if (response.statusCode() == 200) {
                 // 解析响应体
-                log.info(response.body());
+                log.debug("AI服务响应内容: {}", response.body());
                 JSONObject responseObject = new JSONObject(response.body());
                 String requestId = responseObject.getString("id");
                 long created = responseObject.getLong("created");
@@ -97,19 +111,21 @@ public class AiService {
                 DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
                 String formattedTime = createdTime.format(formatter);
 
-                log.info("请求ID: {}, 创建时间: {}, 模型名: {}, 提示词: {}, 补全: {}, 总用量: {}", requestId, formattedTime, model, promptTokens, completionTokens, totalTokens);
+                log.info("AI请求成功 | 请求ID: {} | 创建时间: {} | 模型名: {} | 提示词: {} | 补全: {} | 总用量: {}", 
+                        requestId, formattedTime, model, promptTokens, completionTokens, totalTokens);
+                log.info("AI生成的招呼语: {}", responseContent);
                 return responseContent;
             } else {
-                log.error("AI请求失败！状态码: {}", response.statusCode());
+                log.error("AI服务请求失败，状态码: {}", response.statusCode());
+                log.error("响应内容: {}", response.body());
+                return "false";
             }
-        } catch (TimeoutException e) {
-            log.error("请求超时！超时设置为 {} 秒", timeoutInSeconds);
         } catch (Exception e) {
-            log.error("AI请求异常！", e);
+            log.error("AI服务请求异常: {}", e.getMessage(), e);
+            return "false";
         } finally {
-            executor.shutdownNow();  // 关闭线程池
+            executor.shutdown();
         }
-        return "";
     }
 
 
@@ -143,7 +159,7 @@ public class AiService {
                 "1、熟悉主流大模型如GPT、Gemini、LLaMA、ChatGLM等及其原理，并能进行针对性模型开发工作；\n" +
                 "2、了解深度学习等技术，熟悉大模型训练、推理、量化和部署者优先；\n" +
                 "3、了解主流AI应用框架者（如TensorFlow、PyTorch、longchain等）优先；\n" +
-                "4、熟悉JAVA/C++/Go/Python任一语言，有完整的项目开发经验，具备核心模块设计和维护经验。有一定的算法工程化能力，能够实现算法/模型的工程化与应用部署；具有NLP相关技术经验者更佳；\n" +
+                "4、熟悉PHP/Go/JAVA/Python/C++任一语言，有完整的项目开发经验，具备核心模块设计和维护经验。有一定的算法工程化能力，能够实现算法/模型的工程化与应用部署；具有NLP相关技术经验者更佳；\n" +
                 "熟悉Agent框架，有优化能力，包括planing、action、tools use、memory等核心Agent能力的提升者优先；、了解深度学习等技术，熟悉大模型训练、推理、量化和部署者优先；\n" +
                 "四、能力要求\n" +
                 "1、具备良好的问题解决能力和逻辑思维，能独立分析并解决技术难题。\n" +

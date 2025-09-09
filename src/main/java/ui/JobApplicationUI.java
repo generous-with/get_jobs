@@ -169,27 +169,32 @@ public class JobApplicationUI extends JFrame {
     
     private void initializeComponents() {
         setTitle("求职自动化投递系统");
-        setSize(1000, 800);
+        setSize(800, 650);  // 减小初始窗口大小
+        setMinimumSize(new Dimension(600, 500));  // 设置最小窗口大小
         setLocationRelativeTo(null);
         
         // 初始化各平台参数组件
         initializePlatformComponents();
         
-        // AI参数组件
-        baseUrlField = new JTextField("https://api.deepseek.com", 30);
-        apiKeyField = new JTextField(30);
-        modelField = new JTextField("deepseek-chat", 20);
-        introduceArea = new JTextArea(3, 30);
+        // AI参数组件 - 去掉固定列数，使其自适应
+        baseUrlField = new JTextField("https://api.deepseek.com");
+        apiKeyField = new JTextField();
+        modelField = new JTextField("deepseek-chat");
+        introduceArea = new JTextArea(3, 0);  // 去掉固定列数
         introduceArea.setText("你是一个专业的求职顾问，擅长根据职位描述(JD)和求职者简历内容，撰写个性化的求职招呼语。");
-        promptArea = new JTextArea(5, 30);
+        introduceArea.setLineWrap(true);  // 自动换行
+        introduceArea.setWrapStyleWord(true);  // 按单词换行
+        promptArea = new JTextArea(5, 0);  // 去掉固定列数
         promptArea.setText("你是一个专业的求职顾问，擅长根据职位描述(JD)和求职者简历内容，撰写个性化的求职招呼语。请根据以下信息生成一段个性化的招呼语：\n\n我的个人简介：%s\n\n我期望的职位关键词：%s\n\n职位名称：%s\n\n职位描述(JD)：%s\n\n我预设的招呼语：%s\n\n请根据职位描述和我的个人简介，判断这个职位是否匹配我的背景。如果匹配，请基于职位描述和我的背景，生成一段个性化的招呼语，招呼语需要体现我对这个职位的兴趣和适配度。如果不匹配，请直接回复false。");
+        promptArea.setLineWrap(true);  // 自动换行
+        promptArea.setWrapStyleWord(true);  // 按单词换行
         
-        // Bot消息推送配置组件
+        // Bot消息推送配置组件 - 去掉固定列数
         botSendCheckBox = new JCheckBox("启用企业微信推送");
         botBarkSendCheckBox = new JCheckBox("启用Bark推送");
-        botHookUrlField = new JTextField(30);
+        botHookUrlField = new JTextField();
         botHookUrlField.setText("https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=your_key_here");
-        botBarkUrlField = new JTextField(30);
+        botBarkUrlField = new JTextField();
         botBarkUrlField.setText("https://api.day.app/your_key_here");
         
         // 日志组件
@@ -207,93 +212,103 @@ public class JobApplicationUI extends JFrame {
     }
     
     private void initializePlatformComponents() {
-        // Boss平台参数组件
+        // Boss平台参数组件 - 去掉固定列数，使其自适应
         bossDebuggerCheckBox = new JCheckBox("开发者模式");
-        bossSayHiArea = new JTextArea(3, 30);
+        bossSayHiArea = new JTextArea(3, 0);
         bossSayHiArea.setText("您好,我有多年工作经验,还有AIGC大模型、PHP、Java,Python,Golang和运维的相关经验,希望应聘这个岗位,期待可以与您进一步沟通,谢谢！");
-        bossKeywordsField = new JTextField(20);
+        bossSayHiArea.setLineWrap(true);
+        bossSayHiArea.setWrapStyleWord(true);
+        bossKeywordsField = new JTextField();
         bossKeywordsField.setText("PHP,大模型,Golang,Java");
-        bossCityCodeField = new JTextField("厦门", 20);
-        bossExperienceField = new JTextField("5-10年", 20);
-        bossJobTypeField = new JTextField("不限", 20);
-        bossSalaryField = new JTextField("20-50K", 20);
-        bossWaitTimeField = new JTextField("30", 10);
+        bossCityCodeField = new JTextField("厦门");
+        bossExperienceField = new JTextField("5-10年");
+        bossJobTypeField = new JTextField("不限");
+        bossSalaryField = new JTextField("20-50K");
+        bossWaitTimeField = new JTextField("30");
         bossFilterDeadHRCheckBox = new JCheckBox("过滤不活跃HR");
         
         // Boss平台新增参数组件
-        bossIndustryField = new JTextField("不限", 20);
-        bossDegreeField = new JTextField("不限", 20);
-        bossScaleField = new JTextField("不限", 20);
-        bossStageField = new JTextField("不限", 20);
-        bossExpectedSalaryField = new JTextField("20,30", 20);
+        bossIndustryField = new JTextField("不限");
+        bossDegreeField = new JTextField("不限");
+        bossScaleField = new JTextField("不限");
+        bossStageField = new JTextField("不限");
+        bossExpectedSalaryField = new JTextField("20,30");
         bossEnableAICheckBox = new JCheckBox("开启AI功能");
         bossSendImgResumeCheckBox = new JCheckBox("发送图片简历");
-        bossDeadStatusField = new JTextField("2周内活跃,本月活跃,2月内活跃", 30);
+        bossDeadStatusField = new JTextField("2周内活跃,本月活跃,2月内活跃");
         bossFilterDeadHRCheckBox.setSelected(true);
         
         // 51job平台参数组件
         job51DebuggerCheckBox = new JCheckBox("开发者模式");
-        job51SayHiArea = new JTextArea(3, 30);
+        job51SayHiArea = new JTextArea(3, 0);
         job51SayHiArea.setText("您好,我有多年工作经验,还有AIGC大模型、PHP、Java,Python,Golang和运维的相关经验,希望应聘这个岗位,期待可以与您进一步沟通,谢谢！");
-        job51KeywordsField = new JTextField(20);
+        job51SayHiArea.setLineWrap(true);
+        job51SayHiArea.setWrapStyleWord(true);
+        job51KeywordsField = new JTextField();
         job51KeywordsField.setText("PHP,大模型,Golang,Java");
-        job51CityCodeField = new JTextField("厦门", 20);
-        job51ExperienceField = new JTextField("5-10年", 20);
-        job51JobTypeField = new JTextField("不限", 20);
-        job51SalaryField = new JTextField("20-50K", 20);
-        job51WaitTimeField = new JTextField("30", 10);
+        job51CityCodeField = new JTextField("厦门");
+        job51ExperienceField = new JTextField("5-10年");
+        job51JobTypeField = new JTextField("不限");
+        job51SalaryField = new JTextField("20-50K");
+        job51WaitTimeField = new JTextField("30");
         job51FilterDeadHRCheckBox = new JCheckBox("过滤不活跃HR");
         job51FilterDeadHRCheckBox.setSelected(true);
         
         // job51平台新增参数组件
-        job51JobAreaField = new JTextField("厦门", 20);
+        job51JobAreaField = new JTextField("厦门");
         
         // Lagou平台参数组件
         lagouDebuggerCheckBox = new JCheckBox("开发者模式");
-        lagouSayHiArea = new JTextArea(3, 30);
+        lagouSayHiArea = new JTextArea(3, 0);
         lagouSayHiArea.setText("您好,我有多年工作经验,还有AIGC大模型、PHP、Java,Python,Golang和运维的相关经验,希望应聘这个岗位,期待可以与您进一步沟通,谢谢！");
-        lagouKeywordsField = new JTextField(20);
+        lagouSayHiArea.setLineWrap(true);
+        lagouSayHiArea.setWrapStyleWord(true);
+        lagouKeywordsField = new JTextField();
         lagouKeywordsField.setText("PHP,大模型,Golang,Java");
-        lagouCityCodeField = new JTextField("厦门", 20);
-        lagouExperienceField = new JTextField("5-10年", 20);
-        lagouJobTypeField = new JTextField("不限", 20);
-        lagouSalaryField = new JTextField("20-50K", 20);
-        lagouWaitTimeField = new JTextField("30", 10);
+        lagouCityCodeField = new JTextField("厦门");
+        lagouExperienceField = new JTextField("5-10年");
+        lagouJobTypeField = new JTextField("不限");
+        lagouSalaryField = new JTextField("20-50K");
+        lagouWaitTimeField = new JTextField("30");
         lagouFilterDeadHRCheckBox = new JCheckBox("过滤不活跃HR");
         lagouFilterDeadHRCheckBox.setSelected(true);
         
         // Lagou平台新增参数组件
-        lagouScaleField = new JTextField("不限", 20);
-        lagouGjField = new JTextField("在校/应届,3年及以下", 20);
+        lagouScaleField = new JTextField("不限");
+        lagouGjField = new JTextField("在校/应届,3年及以下");
         
         // Liepin平台参数组件
         liepinDebuggerCheckBox = new JCheckBox("开发者模式");
-        liepinSayHiArea = new JTextArea(3, 30);
+        liepinSayHiArea = new JTextArea(3, 0);
         liepinSayHiArea.setText("您好,我有多年工作经验,还有AIGC大模型、PHP、Java,Python,Golang和运维的相关经验,希望应聘这个岗位,期待可以与您进一步沟通,谢谢！");
-        liepinKeywordsField = new JTextField(20);
+        liepinSayHiArea.setLineWrap(true);
+        liepinSayHiArea.setWrapStyleWord(true);
+        liepinKeywordsField = new JTextField();
         liepinKeywordsField.setText("PHP,大模型,Golang,Java");
-        liepinCityCodeField = new JTextField("厦门", 20);
-        liepinExperienceField = new JTextField("5-10年", 20);
-        liepinJobTypeField = new JTextField("不限", 20);
-        liepinSalaryField = new JTextField("20-50K", 20);
-        liepinWaitTimeField = new JTextField("30", 10);
+        liepinCityCodeField = new JTextField("厦门");
+        liepinExperienceField = new JTextField("5-10年");
+        liepinJobTypeField = new JTextField("不限");
+        liepinSalaryField = new JTextField("20-50K");
+        liepinWaitTimeField = new JTextField("30");
         liepinFilterDeadHRCheckBox = new JCheckBox("过滤不活跃HR");
         liepinFilterDeadHRCheckBox.setSelected(true);
         
         // Liepin平台新增参数组件
-        liepinPubTimeField = new JTextField("30", 20);
+        liepinPubTimeField = new JTextField("30");
         
         // Zhilian平台参数组件
         zhilianDebuggerCheckBox = new JCheckBox("开发者模式");
-        zhilianSayHiArea = new JTextArea(3, 30);
+        zhilianSayHiArea = new JTextArea(3, 0);
         zhilianSayHiArea.setText("您好,我有多年工作经验,还有AIGC大模型、PHP、Java,Python,Golang和运维的相关经验,希望应聘这个岗位,期待可以与您进一步沟通,谢谢！");
-        zhilianKeywordsField = new JTextField(20);
+        zhilianSayHiArea.setLineWrap(true);
+        zhilianSayHiArea.setWrapStyleWord(true);
+        zhilianKeywordsField = new JTextField();
         zhilianKeywordsField.setText("PHP,大模型,Golang,Java");
-        zhilianCityCodeField = new JTextField("厦门", 20);
-        zhilianExperienceField = new JTextField("5-10年", 20);
-        zhilianJobTypeField = new JTextField("不限", 20);
-        zhilianSalaryField = new JTextField("20-50K", 20);
-        zhilianWaitTimeField = new JTextField("30", 10);
+        zhilianCityCodeField = new JTextField("厦门");
+        zhilianExperienceField = new JTextField("5-10年");
+        zhilianJobTypeField = new JTextField("不限");
+        zhilianSalaryField = new JTextField("20-50K");
+        zhilianWaitTimeField = new JTextField("30");
         zhilianFilterDeadHRCheckBox = new JCheckBox("过滤不活跃HR");
         zhilianFilterDeadHRCheckBox.setSelected(true);
     }
@@ -366,109 +381,123 @@ public class JobApplicationUI extends JFrame {
     }
     
     private JPanel createBossPanel() {
-        JPanel panel = new JPanel(new GridBagLayout());
-        panel.setBorder(new TitledBorder("Boss直聘参数配置"));
+        JPanel mainPanel = new JPanel(new BorderLayout());
+        mainPanel.setBorder(new TitledBorder("Boss直聘参数配置"));
+        
+        // 创建可滚动的内容面板
+        JPanel contentPanel = new JPanel(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(2, 2, 2, 2);
+        gbc.insets = new Insets(5, 5, 5, 5);
         gbc.anchor = GridBagConstraints.WEST;
         
-        // 第一行 - Debugger
-        gbc.gridx = 0; gbc.gridy = 0;
-        panel.add(new JLabel("开发者模式:"), gbc);
+        int row = 0;
+        
+        // 第一行：开发者模式 和 过滤不活跃HR （两列布局）
+        gbc.gridx = 0; gbc.gridy = row; gbc.gridwidth = 1;
+        contentPanel.add(bossDebuggerCheckBox, gbc);
         gbc.gridx = 1;
-        panel.add(bossDebuggerCheckBox, gbc);
+        contentPanel.add(bossFilterDeadHRCheckBox, gbc);
+        row++;
         
-        // 第二行 - Say Hi
-        gbc.gridx = 0; gbc.gridy = 1;
-        panel.add(new JLabel("打招呼语:"), gbc);
+        // 第二行：打招呼语 （跨两列）
+        gbc.gridx = 0; gbc.gridy = row; gbc.gridwidth = 1;
+        contentPanel.add(new JLabel("打招呼语:"), gbc);
+        gbc.gridx = 1; gbc.gridwidth = 2; gbc.fill = GridBagConstraints.BOTH; gbc.weightx = 1.0;
+        JScrollPane sayHiScroll = new JScrollPane(bossSayHiArea);
+        sayHiScroll.setPreferredSize(new Dimension(0, 80));
+        contentPanel.add(sayHiScroll, gbc);
+        gbc.fill = GridBagConstraints.NONE; gbc.weightx = 0;
+        row++;
+        
+        // 第三行：搜索关键词 和 城市代码
+        gbc.gridx = 0; gbc.gridy = row; gbc.gridwidth = 1;
+        contentPanel.add(new JLabel("搜索关键词:"), gbc);
+        gbc.gridx = 1; gbc.fill = GridBagConstraints.HORIZONTAL; gbc.weightx = 0.5;
+        contentPanel.add(bossKeywordsField, gbc);
+        gbc.gridx = 2; gbc.weightx = 0; gbc.fill = GridBagConstraints.NONE;
+        contentPanel.add(new JLabel("城市代码:"), gbc);
+        gbc.gridx = 3; gbc.fill = GridBagConstraints.HORIZONTAL; gbc.weightx = 0.5;
+        contentPanel.add(bossCityCodeField, gbc);
+        gbc.fill = GridBagConstraints.NONE; gbc.weightx = 0;
+        row++;
+        
+        // 第四行：工作经验 和 求职类型
+        gbc.gridx = 0; gbc.gridy = row; gbc.gridwidth = 1;
+        contentPanel.add(new JLabel("工作经验:"), gbc);
+        gbc.gridx = 1; gbc.fill = GridBagConstraints.HORIZONTAL; gbc.weightx = 0.5;
+        contentPanel.add(bossExperienceField, gbc);
+        gbc.gridx = 2; gbc.weightx = 0; gbc.fill = GridBagConstraints.NONE;
+        contentPanel.add(new JLabel("求职类型:"), gbc);
+        gbc.gridx = 3; gbc.fill = GridBagConstraints.HORIZONTAL; gbc.weightx = 0.5;
+        contentPanel.add(bossJobTypeField, gbc);
+        gbc.fill = GridBagConstraints.NONE; gbc.weightx = 0;
+        row++;
+        
+        // 第五行：期望薪资 和 等待时间
+        gbc.gridx = 0; gbc.gridy = row; gbc.gridwidth = 1;
+        contentPanel.add(new JLabel("期望薪资:"), gbc);
+        gbc.gridx = 1; gbc.fill = GridBagConstraints.HORIZONTAL; gbc.weightx = 0.5;
+        contentPanel.add(bossSalaryField, gbc);
+        gbc.gridx = 2; gbc.weightx = 0; gbc.fill = GridBagConstraints.NONE;
+        contentPanel.add(new JLabel("等待时间(秒):"), gbc);
+        gbc.gridx = 3; gbc.fill = GridBagConstraints.HORIZONTAL; gbc.weightx = 0.5;
+        contentPanel.add(bossWaitTimeField, gbc);
+        gbc.fill = GridBagConstraints.NONE; gbc.weightx = 0;
+        row++;
+        
+        // 第六行：公司行业 和 学历要求
+        gbc.gridx = 0; gbc.gridy = row; gbc.gridwidth = 1;
+        contentPanel.add(new JLabel("公司行业:"), gbc);
+        gbc.gridx = 1; gbc.fill = GridBagConstraints.HORIZONTAL; gbc.weightx = 0.5;
+        contentPanel.add(bossIndustryField, gbc);
+        gbc.gridx = 2; gbc.weightx = 0; gbc.fill = GridBagConstraints.NONE;
+        contentPanel.add(new JLabel("学历要求:"), gbc);
+        gbc.gridx = 3; gbc.fill = GridBagConstraints.HORIZONTAL; gbc.weightx = 0.5;
+        contentPanel.add(bossDegreeField, gbc);
+        gbc.fill = GridBagConstraints.NONE; gbc.weightx = 0;
+        row++;
+        
+        // 第七行：公司规模 和 融资阶段
+        gbc.gridx = 0; gbc.gridy = row; gbc.gridwidth = 1;
+        contentPanel.add(new JLabel("公司规模:"), gbc);
+        gbc.gridx = 1; gbc.fill = GridBagConstraints.HORIZONTAL; gbc.weightx = 0.5;
+        contentPanel.add(bossScaleField, gbc);
+        gbc.gridx = 2; gbc.weightx = 0; gbc.fill = GridBagConstraints.NONE;
+        contentPanel.add(new JLabel("融资阶段:"), gbc);
+        gbc.gridx = 3; gbc.fill = GridBagConstraints.HORIZONTAL; gbc.weightx = 0.5;
+        contentPanel.add(bossStageField, gbc);
+        gbc.fill = GridBagConstraints.NONE; gbc.weightx = 0;
+        row++;
+        
+        // 第八行：期望薪资范围
+        gbc.gridx = 0; gbc.gridy = row; gbc.gridwidth = 1;
+        contentPanel.add(new JLabel("期望薪资范围:"), gbc);
+        gbc.gridx = 1; gbc.fill = GridBagConstraints.HORIZONTAL; gbc.weightx = 1.0;
+        contentPanel.add(bossExpectedSalaryField, gbc);
+        gbc.fill = GridBagConstraints.NONE; gbc.weightx = 0;
+        row++;
+        
+        // 第九行：AI功能 和 图片简历
+        gbc.gridx = 0; gbc.gridy = row; gbc.gridwidth = 1;
+        contentPanel.add(bossEnableAICheckBox, gbc);
         gbc.gridx = 1;
-        panel.add(new JScrollPane(bossSayHiArea), gbc);
+        contentPanel.add(bossSendImgResumeCheckBox, gbc);
+        row++;
         
-        // 第三行 - Keywords
-        gbc.gridx = 0; gbc.gridy = 2;
-        panel.add(new JLabel("搜索关键词:"), gbc);
-        gbc.gridx = 1;
-        panel.add(bossKeywordsField, gbc);
+        // 第十行：DR状态过滤 （跨列）
+        gbc.gridx = 0; gbc.gridy = row; gbc.gridwidth = 1;
+        contentPanel.add(new JLabel("HR状态过滤:"), gbc);
+        gbc.gridx = 1; gbc.gridwidth = 3; gbc.fill = GridBagConstraints.HORIZONTAL; gbc.weightx = 1.0;
+        contentPanel.add(bossDeadStatusField, gbc);
         
-        // 第四行 - City Code
-        gbc.gridx = 0; gbc.gridy = 3;
-        panel.add(new JLabel("城市代码:"), gbc);
-        gbc.gridx = 1;
-        panel.add(bossCityCodeField, gbc);
+        // 添加滚动支持
+        JScrollPane scrollPane = new JScrollPane(contentPanel);
+        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+        scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        scrollPane.setBorder(null);
         
-        // 第五行 - Experience
-        gbc.gridx = 0; gbc.gridy = 4;
-        panel.add(new JLabel("工作经验:"), gbc);
-        gbc.gridx = 1;
-        panel.add(bossExperienceField, gbc);
-        
-        // 第六行 - Job Type
-        gbc.gridx = 0; gbc.gridy = 5;
-        panel.add(new JLabel("求职类型:"), gbc);
-        gbc.gridx = 1;
-        panel.add(bossJobTypeField, gbc);
-        
-        // 第七行 - Salary
-        gbc.gridx = 0; gbc.gridy = 6;
-        panel.add(new JLabel("期望薪资:"), gbc);
-        gbc.gridx = 1;
-        panel.add(bossSalaryField, gbc);
-        
-        // 第八行 - Wait Time
-        gbc.gridx = 0; gbc.gridy = 7;
-        panel.add(new JLabel("等待时间(秒):"), gbc);
-        gbc.gridx = 1;
-        panel.add(bossWaitTimeField, gbc);
-        
-        // 第九行 - Filter Dead HR
-        gbc.gridx = 0; gbc.gridy = 8;
-        panel.add(bossFilterDeadHRCheckBox, gbc);
-        
-        // 第十行 - Industry
-        gbc.gridx = 0; gbc.gridy = 9;
-        panel.add(new JLabel("公司行业:"), gbc);
-        gbc.gridx = 1;
-        panel.add(bossIndustryField, gbc);
-        
-        // 第十一行 - Degree
-        gbc.gridx = 0; gbc.gridy = 10;
-        panel.add(new JLabel("学历要求:"), gbc);
-        gbc.gridx = 1;
-        panel.add(bossDegreeField, gbc);
-        
-        // 第十二行 - Scale
-        gbc.gridx = 0; gbc.gridy = 11;
-        panel.add(new JLabel("公司规模:"), gbc);
-        gbc.gridx = 1;
-        panel.add(bossScaleField, gbc);
-        
-        // 第十三行 - Stage
-        gbc.gridx = 0; gbc.gridy = 12;
-        panel.add(new JLabel("融资阶段:"), gbc);
-        gbc.gridx = 1;
-        panel.add(bossStageField, gbc);
-        
-        // 第十四行 - Expected Salary
-        gbc.gridx = 0; gbc.gridy = 13;
-        panel.add(new JLabel("期望薪资范围:"), gbc);
-        gbc.gridx = 1;
-        panel.add(bossExpectedSalaryField, gbc);
-        
-        // 第十五行 - Enable AI
-        gbc.gridx = 0; gbc.gridy = 14;
-        panel.add(bossEnableAICheckBox, gbc);
-        
-        // 第十六行 - Send Img Resume
-        gbc.gridx = 0; gbc.gridy = 15;
-        panel.add(bossSendImgResumeCheckBox, gbc);
-        
-        // 第十七行 - Dead Status
-        gbc.gridx = 0; gbc.gridy = 16;
-        panel.add(new JLabel("HR状态过滤:"), gbc);
-        gbc.gridx = 1;
-        panel.add(bossDeadStatusField, gbc);
-        
-        return panel;
+        mainPanel.add(scrollPane, BorderLayout.CENTER);
+        return mainPanel;
     }
     
     private JPanel createJob51Panel() {
@@ -744,73 +773,100 @@ public class JobApplicationUI extends JFrame {
     }
     
     private JPanel createAiPanel() {
-        JPanel panel = new JPanel(new GridBagLayout());
-        panel.setBorder(new TitledBorder("AI参数配置"));
+        JPanel mainPanel = new JPanel(new BorderLayout());
+        mainPanel.setBorder(new TitledBorder("AI参数配置"));
+        
+        JPanel contentPanel = new JPanel(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(2, 2, 2, 2);
+        gbc.insets = new Insets(8, 8, 8, 8);
         gbc.anchor = GridBagConstraints.WEST;
         
-        // 第一行 - Base URL
-        gbc.gridx = 0; gbc.gridy = 0;
-        panel.add(new JLabel("API基础URL:"), gbc);
-        gbc.gridx = 1;
-        panel.add(baseUrlField, gbc);
+        // 第一行 - API基础URL 和 模型名称
+        gbc.gridx = 0; gbc.gridy = 0; gbc.gridwidth = 1;
+        contentPanel.add(new JLabel("API基础URL:"), gbc);
+        gbc.gridx = 1; gbc.fill = GridBagConstraints.HORIZONTAL; gbc.weightx = 0.6;
+        contentPanel.add(baseUrlField, gbc);
+        gbc.gridx = 2; gbc.weightx = 0; gbc.fill = GridBagConstraints.NONE;
+        contentPanel.add(new JLabel("模型名称:"), gbc);
+        gbc.gridx = 3; gbc.fill = GridBagConstraints.HORIZONTAL; gbc.weightx = 0.4;
+        contentPanel.add(modelField, gbc);
+        gbc.fill = GridBagConstraints.NONE; gbc.weightx = 0;
         
-        // 第二行 - API Key
-        gbc.gridx = 0; gbc.gridy = 1;
-        panel.add(new JLabel("API密钥:"), gbc);
-        gbc.gridx = 1;
-        panel.add(apiKeyField, gbc);
+        // 第二行 - API密钥 （跨列）
+        gbc.gridx = 0; gbc.gridy = 1; gbc.gridwidth = 1;
+        contentPanel.add(new JLabel("API密钥:"), gbc);
+        gbc.gridx = 1; gbc.gridwidth = 3; gbc.fill = GridBagConstraints.HORIZONTAL; gbc.weightx = 1.0;
+        contentPanel.add(apiKeyField, gbc);
+        gbc.fill = GridBagConstraints.NONE; gbc.weightx = 0; gbc.gridwidth = 1;
         
-        // 第三行 - Model
-        gbc.gridx = 0; gbc.gridy = 2;
-        panel.add(new JLabel("模型名称:"), gbc);
-        gbc.gridx = 1;
-        panel.add(modelField, gbc);
+        // 第三行 - AI介绍 （跨列）
+        gbc.gridx = 0; gbc.gridy = 2; gbc.gridwidth = 1;
+        contentPanel.add(new JLabel("AI介绍:"), gbc);
+        gbc.gridx = 1; gbc.gridwidth = 3; gbc.fill = GridBagConstraints.BOTH; gbc.weightx = 1.0; gbc.weighty = 0.3;
+        JScrollPane introduceScroll = new JScrollPane(introduceArea);
+        introduceScroll.setPreferredSize(new Dimension(0, 80));
+        contentPanel.add(introduceScroll, gbc);
+        gbc.fill = GridBagConstraints.NONE; gbc.weightx = 0; gbc.weighty = 0; gbc.gridwidth = 1;
         
-        // 第四行 - Introduce
-        gbc.gridx = 0; gbc.gridy = 3;
-        panel.add(new JLabel("AI介绍:"), gbc);
-        gbc.gridx = 1;
-        panel.add(new JScrollPane(introduceArea), gbc);
+        // 第四行 - 提示词模板 （跨列）
+        gbc.gridx = 0; gbc.gridy = 3; gbc.gridwidth = 1;
+        contentPanel.add(new JLabel("提示词模板:"), gbc);
+        gbc.gridx = 1; gbc.gridwidth = 3; gbc.fill = GridBagConstraints.BOTH; gbc.weightx = 1.0; gbc.weighty = 0.7;
+        JScrollPane promptScroll = new JScrollPane(promptArea);
+        promptScroll.setPreferredSize(new Dimension(0, 150));
+        contentPanel.add(promptScroll, gbc);
         
-        // 第五行 - Prompt
-        gbc.gridx = 0; gbc.gridy = 4;
-        panel.add(new JLabel("提示词模板:"), gbc);
-        gbc.gridx = 1;
-        panel.add(new JScrollPane(promptArea), gbc);
+        // 添加滚动支持
+        JScrollPane scrollPane = new JScrollPane(contentPanel);
+        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+        scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        scrollPane.setBorder(null);
         
-        return panel;
+        mainPanel.add(scrollPane, BorderLayout.CENTER);
+        return mainPanel;
     }
     
     private JPanel createBotPanel() {
-        JPanel panel = new JPanel(new GridBagLayout());
-        panel.setBorder(new TitledBorder("消息推送配置"));
+        JPanel mainPanel = new JPanel(new BorderLayout());
+        mainPanel.setBorder(new TitledBorder("消息推送配置"));
+        
+        JPanel contentPanel = new JPanel(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(2, 2, 2, 2);
+        gbc.insets = new Insets(10, 10, 10, 10);
         gbc.anchor = GridBagConstraints.WEST;
         
-        // 第一行 - 企业微信推送
-        gbc.gridx = 0; gbc.gridy = 0;
-        panel.add(botSendCheckBox, gbc);
+        // 第一行 - 企业微信推送 和 Bark推送
+        gbc.gridx = 0; gbc.gridy = 0; gbc.gridwidth = 2;
+        contentPanel.add(botSendCheckBox, gbc);
+        gbc.gridx = 2; gbc.gridwidth = 2;
+        contentPanel.add(botBarkSendCheckBox, gbc);
         
         // 第二行 - Hook URL
-        gbc.gridx = 0; gbc.gridy = 1;
-        panel.add(new JLabel("Hook URL:"), gbc);
-        gbc.gridx = 1;
-        panel.add(botHookUrlField, gbc);
+        gbc.gridx = 0; gbc.gridy = 1; gbc.gridwidth = 1;
+        contentPanel.add(new JLabel("Hook URL:"), gbc);
+        gbc.gridx = 1; gbc.gridwidth = 3; gbc.fill = GridBagConstraints.HORIZONTAL; gbc.weightx = 1.0;
+        contentPanel.add(botHookUrlField, gbc);
+        gbc.fill = GridBagConstraints.NONE; gbc.weightx = 0; gbc.gridwidth = 1;
         
-        // 第三行 - Bark推送
-        gbc.gridx = 0; gbc.gridy = 2;
-        panel.add(botBarkSendCheckBox, gbc);
+        // 第三行 - Bark URL
+        gbc.gridx = 0; gbc.gridy = 2; gbc.gridwidth = 1;
+        contentPanel.add(new JLabel("Bark URL:"), gbc);
+        gbc.gridx = 1; gbc.gridwidth = 3; gbc.fill = GridBagConstraints.HORIZONTAL; gbc.weightx = 1.0;
+        contentPanel.add(botBarkUrlField, gbc);
         
-        // 第四行 - Bark URL
-        gbc.gridx = 0; gbc.gridy = 3;
-        panel.add(new JLabel("Bark URL:"), gbc);
-        gbc.gridx = 1;
-        panel.add(botBarkUrlField, gbc);
+        // 添加一些说明文本
+        gbc.gridx = 0; gbc.gridy = 3; gbc.gridwidth = 4; gbc.fill = GridBagConstraints.HORIZONTAL;
+        JLabel infoLabel = new JLabel("<html><font color='gray'>提示：配置正确的Webhook URL可接收程序运行状态通知</font></html>");
+        contentPanel.add(infoLabel, gbc);
         
-        return panel;
+        // 添加滚动支持
+        JScrollPane scrollPane = new JScrollPane(contentPanel);
+        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+        scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        scrollPane.setBorder(null);
+        
+        mainPanel.add(scrollPane, BorderLayout.CENTER);
+        return mainPanel;
     }
     
     private JPanel createLogPanel() {

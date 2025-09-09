@@ -84,16 +84,25 @@ public class Boss {
     }
 
     public static void main(String[] args) {
-        loadData(dataPath);
-        // 使用 PlayWright 获取岗位
-        PlaywrightUtil.init();
-        startDate = new Date();
-        login();
-        config.getCityCode().forEach(Boss::postJobByCity);
-        log.info(resultList.isEmpty() ? "未发起新的聊天..." : "新发起聊天公司如下:\n{}",
-                resultList.stream().map(Object::toString).collect(Collectors.joining("\n")));
-        if (!config.getDebugger()) {
-            printResult();
+        try {
+            loadData(dataPath);
+            // 使用 PlayWright 获取岗位
+            PlaywrightUtil.init();
+            startDate = new Date();
+            login();
+            config.getCityCode().forEach(Boss::postJobByCity);
+            log.info(resultList.isEmpty() ? "未发起新的聊天..." : "新发起聊天公司如下:\n{}",
+                    resultList.stream().map(Object::toString).collect(Collectors.joining("\n")));
+        } catch (Exception e) {
+            log.error("程序执行过程中发生异常: {}", e.getMessage(), e);
+        } finally {
+            try {
+                if (!config.getDebugger()) {
+                    printResult();
+                }
+            } catch (Exception e) {
+                log.error("程序退出时发生异常: {}", e.getMessage(), e);
+            }
         }
     }
 
@@ -148,63 +157,84 @@ public class Boss {
             Locator cards = page.locator("//ul[contains(@class, 'rec-job-list')]//li[contains(@class, 'job-card-box')]");
             int count = cards.count();
             for (int i = 0; i < count; i++) {
-                // 重新获取卡片，避免元素过期
-                cards = page.locator("//ul[contains(@class, 'rec-job-list')]//li[contains(@class, 'job-card-box')]");
-                cards.nth(i).click();
-                PlaywrightUtil.sleep(1);
+                try {
+                    // 检查页面是否仍然有效
+                    if (page.isClosed()) {
+                        log.error("页面已关闭，无法继续操作岗位");
+                        break;
+                    }
+                    
+                    // 重新获取卡片，避免元素过期
+                    cards = page.locator("//ul[contains(@class, 'rec-job-list')]//li[contains(@class, 'job-card-box')]");
+                    cards.nth(i).click();
+                    PlaywrightUtil.sleep(1);
 
-                // 等待详情内容加载
-                page.waitForSelector("div[class*='job-detail-box']", new Page.WaitForSelectorOptions().setTimeout(4000));
-                Locator detailBox = page.locator("div[class*='job-detail-box']");
+                    // 等待详情内容加载
+                    page.waitForSelector("div[class*='job-detail-box']", new Page.WaitForSelectorOptions().setTimeout(4000));
+                    Locator detailBox = page.locator("div[class*='job-detail-box']");
 
-                // 岗位名称
-                String jobName = safeText(detailBox, "span[class*='job-name']");
-                if (blackJobs.stream().anyMatch(jobName::contains)) continue;
-                // 薪资(原始)
-                String jobSalaryRaw = safeText(detailBox, "span.job-salary");
-                String jobSalary = decodeSalary(jobSalaryRaw);
-                // 城市/经验/学历
-                List<String> tags = safeAllText(detailBox, "ul[class*='tag-list'] > li");
-                // 标签 (暂时不使用)
-                // List<String> jobLabels = safeAllText(detailBox, "ul[class*='job-label-list'] > li");
-                // 岗位描述
-                String jobDesc = safeText(detailBox, "p.desc");
-                // Boss姓名、活跃
-                String bossNameRaw = safeText(detailBox, "h2[class*='name']");
-                String[] bossInfo = splitBossName(bossNameRaw);
-                String bossName = bossInfo[0];
-                String bossActive = bossInfo[1];
+                    // 岗位名称
+                    String jobName = safeText(detailBox, "span[class*='job-name']");
+                    if (blackJobs.stream().anyMatch(jobName::contains)) continue;
+                    // 薪资(原始)
+                    String jobSalaryRaw = safeText(detailBox, "span.job-salary");
+                    String jobSalary = decodeSalary(jobSalaryRaw);
+                    // 城市/经验/学历
+                    List<String> tags = safeAllText(detailBox, "ul[class*='tag-list'] > li");
+                    // 标签 (暂时不使用)
+                    // List<String> jobLabels = safeAllText(detailBox, "ul[class*='job-label-list'] > li");
+                    // 岗位描述
+                    String jobDesc = safeText(detailBox, "p.desc");
+                    // Boss姓名、活跃
+                    String bossNameRaw = safeText(detailBox, "h2[class*='name']");
+                    String[] bossInfo = splitBossName(bossNameRaw);
+                    String bossName = bossInfo[0];
+                    String bossActive = bossInfo[1];
                 
-                // 检查HR是否为不活跃状态，如果是则跳过该岗位
-                if (isDeadHR(page)) {
-                    log.info("检测到HR状态不活跃，跳过该岗位: {}", jobName);
-                    // 关闭详情页，回到主页面
-                    page.close();
+                    // 检查HR是否为不活跃状态，如果是则跳过该岗位
+                    if (isDeadHR(page)) {
+                        log.info("检测到HR状态不活跃，跳过该岗位: {}", jobName);
+                        // 关闭详情页，回到主页面
+                        page.close();
+                        continue;
+                    }
+                
+                    if (config.getDeadStatus().stream().anyMatch(bossActive::contains)) continue;
+                    // Boss公司/职位
+                    String bossTitleRaw = safeText(detailBox, "div[class*='boss-info-attr']");
+                    String[] bossTitleInfo = splitBossTitle(bossTitleRaw);
+                    String bossCompany = bossTitleInfo[0];
+                    if (blackCompanies.stream().anyMatch(bossCompany::contains)) continue;
+                    String bossJobTitle = bossTitleInfo[1];
+                    if (blackRecruiters.stream().anyMatch(bossJobTitle::contains)) continue;
+
+                    // 创建Job对象
+                    Job job = new Job();
+                    job.setJobName(jobName);
+                    job.setSalary(jobSalary);
+                    job.setJobArea(String.join(", ", tags));
+                    job.setCompanyName(bossCompany);
+                    job.setRecruiter(bossName);
+                    job.setJobInfo(jobDesc);
+
+                    // 输出
+//                log.info("正在投递：第{}条 | 岗位名称：{} | 薪资：{} | 城市/经验/学历：{} | Boss姓名：{} | 活跃状态：{} | 公司：{} | 职位：{}", (i + 1), jobName, jobSalary, tags, bossName, bossActive, bossCompany, bossJobTitle);
+                    resumeSubmission(page, keyword, job);
+                    postCount++;
+                } catch (com.microsoft.playwright.PlaywrightException e) {
+                    if (e.getMessage().contains("Target page, context or browser has been closed")) {
+                        log.error("浏览器页面已关闭，无法继续操作岗位，跳出循环");
+                        break;
+                    } else {
+                        log.error("操作岗位时发生Playwright异常: {}", e.getMessage());
+                        // 继续下一个岗位
+                        continue;
+                    }
+                } catch (Exception e) {
+                    log.error("操作岗位时发生未知异常: {}", e.getMessage(), e);
+                    // 继续下一个岗位
                     continue;
                 }
-                
-                if (config.getDeadStatus().stream().anyMatch(bossActive::contains)) continue;
-                // Boss公司/职位
-                String bossTitleRaw = safeText(detailBox, "div[class*='boss-info-attr']");
-                String[] bossTitleInfo = splitBossTitle(bossTitleRaw);
-                String bossCompany = bossTitleInfo[0];
-                if (blackCompanies.stream().anyMatch(bossCompany::contains)) continue;
-                String bossJobTitle = bossTitleInfo[1];
-                if (blackRecruiters.stream().anyMatch(bossJobTitle::contains)) continue;
-
-                // 创建Job对象
-                Job job = new Job();
-                job.setJobName(jobName);
-                job.setSalary(jobSalary);
-                job.setJobArea(String.join(", ", tags));
-                job.setCompanyName(bossCompany);
-                job.setRecruiter(bossName);
-                job.setJobInfo(jobDesc);
-
-                // 输出
-//                log.info("正在投递：第{}条 | 岗位名称：{} | 薪资：{} | 城市/经验/学历：{} | Boss姓名：{} | 活跃状态：{} | 公司：{} | 职位：{}", (i + 1), jobName, jobSalary, tags, bossName, bossActive, bossCompany, bossJobTitle);
-                resumeSubmission(page, keyword, job);
-                postCount++;
             }
             log.info("【{}】岗位已投递完毕！已投递岗位数量:{}", keyword, postCount);
         }

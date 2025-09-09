@@ -134,18 +134,47 @@ public class PlaywrightUtil {
      * 关闭Playwright及浏览器实例
      */
     public static void close() {
-        if (DESKTOP_PAGE != null)
-            DESKTOP_PAGE.close();
-        if (MOBILE_PAGE != null)
-            MOBILE_PAGE.close();
-        if (DESKTOP_CONTEXT != null)
-            DESKTOP_CONTEXT.close();
-        if (MOBILE_CONTEXT != null)
-            MOBILE_CONTEXT.close();
-        if (BROWSER != null)
-            BROWSER.close();
-        if (PLAYWRIGHT != null)
-            PLAYWRIGHT.close();
+        try {
+            if (DESKTOP_PAGE != null && !DESKTOP_PAGE.isClosed())
+                DESKTOP_PAGE.close();
+        } catch (Exception e) {
+            log.warn("关闭桌面页面时发生异常: {}", e.getMessage());
+        }
+        
+        try {
+            if (MOBILE_PAGE != null && !MOBILE_PAGE.isClosed())
+                MOBILE_PAGE.close();
+        } catch (Exception e) {
+            log.warn("关闭移动页面时发生异常: {}", e.getMessage());
+        }
+        
+        try {
+            if (DESKTOP_CONTEXT != null)
+                DESKTOP_CONTEXT.close();
+        } catch (Exception e) {
+            log.warn("关闭桌面上下文时发生异常: {}", e.getMessage());
+        }
+        
+        try {
+            if (MOBILE_CONTEXT != null)
+                MOBILE_CONTEXT.close();
+        } catch (Exception e) {
+            log.warn("关闭移动上下文时发生异常: {}", e.getMessage());
+        }
+        
+        try {
+            if (BROWSER != null)
+                BROWSER.close();
+        } catch (Exception e) {
+            log.warn("关闭浏览器时发生异常: {}", e.getMessage());
+        }
+        
+        try {
+            if (PLAYWRIGHT != null)
+                PLAYWRIGHT.close();
+        } catch (Exception e) {
+            log.warn("关闭Playwright时发生异常: {}", e.getMessage());
+        }
 
         log.info("Playwright及浏览器实例已关闭");
     }

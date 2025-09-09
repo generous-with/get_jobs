@@ -84,25 +84,16 @@ public class Boss {
     }
 
     public static void main(String[] args) {
-        try {
-            loadData(dataPath);
-            // 使用 PlayWright 获取岗位
-            PlaywrightUtil.init();
-            startDate = new Date();
-            login();
-            config.getCityCode().forEach(Boss::postJobByCity);
-            log.info(resultList.isEmpty() ? "未发起新的聊天..." : "新发起聊天公司如下:\n{}",
-                    resultList.stream().map(Object::toString).collect(Collectors.joining("\n")));
-        } catch (Exception e) {
-            log.error("程序执行过程中发生异常: {}", e.getMessage(), e);
-        } finally {
-            try {
-                if (!config.getDebugger()) {
-                    printResult();
-                }
-            } catch (Exception e) {
-                log.error("程序退出时发生异常: {}", e.getMessage(), e);
-            }
+        loadData(dataPath);
+        // 使用 PlayWright 获取岗位
+        PlaywrightUtil.init();
+        startDate = new Date();
+        login();
+        config.getCityCode().forEach(Boss::postJobByCity);
+        log.info(resultList.isEmpty() ? "未发起新的聊天..." : "新发起聊天公司如下:\n{}",
+                resultList.stream().map(Object::toString).collect(Collectors.joining("\n")));
+        if (!config.getDebugger()) {
+            printResult();
         }
     }
 
@@ -157,84 +148,54 @@ public class Boss {
             Locator cards = page.locator("//ul[contains(@class, 'rec-job-list')]//li[contains(@class, 'job-card-box')]");
             int count = cards.count();
             for (int i = 0; i < count; i++) {
-                try {
-                    // 检查页面是否仍然有效
-                    if (page.isClosed()) {
-                        log.error("页面已关闭，无法继续操作岗位");
-                        break;
-                    }
-                    
-                    // 重新获取卡片，避免元素过期
-                    cards = page.locator("//ul[contains(@class, 'rec-job-list')]//li[contains(@class, 'job-card-box')]");
-                    cards.nth(i).click();
-                    PlaywrightUtil.sleep(1);
+                // 重新获取卡片，避免元素过期
+                cards = page.locator("//ul[contains(@class, 'rec-job-list')]//li[contains(@class, 'job-card-box')]");
+                cards.nth(i).click();
+                PlaywrightUtil.sleep(1);
 
-                    // 等待详情内容加载
-                    page.waitForSelector("div[class*='job-detail-box']", new Page.WaitForSelectorOptions().setTimeout(4000));
-                    Locator detailBox = page.locator("div[class*='job-detail-box']");
+                // 等待详情内容加载
+                page.waitForSelector("div[class*='job-detail-box']", new Page.WaitForSelectorOptions().setTimeout(4000));
+                Locator detailBox = page.locator("div[class*='job-detail-box']");
 
-                    // 岗位名称
-                    String jobName = safeText(detailBox, "span[class*='job-name']");
-                    if (blackJobs.stream().anyMatch(jobName::contains)) continue;
-                    // 薪资(原始)
-                    String jobSalaryRaw = safeText(detailBox, "span.job-salary");
-                    String jobSalary = decodeSalary(jobSalaryRaw);
-                    // 城市/经验/学历
-                    List<String> tags = safeAllText(detailBox, "ul[class*='tag-list'] > li");
-                    // 标签 (暂时不使用)
-                    // List<String> jobLabels = safeAllText(detailBox, "ul[class*='job-label-list'] > li");
-                    // 岗位描述
-                    String jobDesc = safeText(detailBox, "p.desc");
-                    // Boss姓名、活跃
-                    String bossNameRaw = safeText(detailBox, "h2[class*='name']");
-                    String[] bossInfo = splitBossName(bossNameRaw);
-                    String bossName = bossInfo[0];
-                    String bossActive = bossInfo[1];
-                
-                    // 检查HR是否为不活跃状态，如果是则跳过该岗位
-                    if (isDeadHR(page)) {
-                        log.info("检测到HR状态不活跃，跳过该岗位: {}", jobName);
-                        // 关闭详情页，回到主页面
-                        page.close();
-                        continue;
-                    }
-                
-                    if (config.getDeadStatus().stream().anyMatch(bossActive::contains)) continue;
-                    // Boss公司/职位
-                    String bossTitleRaw = safeText(detailBox, "div[class*='boss-info-attr']");
-                    String[] bossTitleInfo = splitBossTitle(bossTitleRaw);
-                    String bossCompany = bossTitleInfo[0];
-                    if (blackCompanies.stream().anyMatch(bossCompany::contains)) continue;
-                    String bossJobTitle = bossTitleInfo[1];
-                    if (blackRecruiters.stream().anyMatch(bossJobTitle::contains)) continue;
+                // 岗位名称
+                String jobName = safeText(detailBox, "span[class*='job-name']");
+                if (blackJobs.stream().anyMatch(jobName::contains)) continue;
+                // 薪资(原始)
+                String jobSalaryRaw = safeText(detailBox, "span.job-salary");
+                String jobSalary = decodeSalary(jobSalaryRaw);
+                // 城市/经验/学历
+                List<String> tags = safeAllText(detailBox, "ul[class*='tag-list'] > li");
+                // 标签 (暂时不使用)
+                // List<String> jobLabels = safeAllText(detailBox, "ul[class*='job-label-list'] > li");
+                // 岗位描述
+                String jobDesc = safeText(detailBox, "p.desc");
+                // Boss姓名、活跃
+                String bossNameRaw = safeText(detailBox, "h2[class*='name']");
+                String[] bossInfo = splitBossName(bossNameRaw);
+                String bossName = bossInfo[0];
+                String bossActive = bossInfo[1];
+                if (config.getDeadStatus().stream().anyMatch(bossActive::contains)) continue;
+                // Boss公司/职位
+                String bossTitleRaw = safeText(detailBox, "div[class*='boss-info-attr']");
+                String[] bossTitleInfo = splitBossTitle(bossTitleRaw);
+                String bossCompany = bossTitleInfo[0];
+                if (blackCompanies.stream().anyMatch(bossCompany::contains)) continue;
+                String bossJobTitle = bossTitleInfo[1];
+                if (blackRecruiters.stream().anyMatch(bossJobTitle::contains)) continue;
 
-                    // 创建Job对象
-                    Job job = new Job();
-                    job.setJobName(jobName);
-                    job.setSalary(jobSalary);
-                    job.setJobArea(String.join(", ", tags));
-                    job.setCompanyName(bossCompany);
-                    job.setRecruiter(bossName);
-                    job.setJobInfo(jobDesc);
+                // 创建Job对象
+                Job job = new Job();
+                job.setJobName(jobName);
+                job.setSalary(jobSalary);
+                job.setJobArea(String.join(", ", tags));
+                job.setCompanyName(bossCompany);
+                job.setRecruiter(bossName);
+                job.setJobInfo(jobDesc);
 
-                    // 输出
+                // 输出
 //                log.info("正在投递：第{}条 | 岗位名称：{} | 薪资：{} | 城市/经验/学历：{} | Boss姓名：{} | 活跃状态：{} | 公司：{} | 职位：{}", (i + 1), jobName, jobSalary, tags, bossName, bossActive, bossCompany, bossJobTitle);
-                    resumeSubmission(page, keyword, job);
-                    postCount++;
-                } catch (com.microsoft.playwright.PlaywrightException e) {
-                    if (e.getMessage().contains("Target page, context or browser has been closed")) {
-                        log.error("浏览器页面已关闭，无法继续操作岗位，跳出循环");
-                        break;
-                    } else {
-                        log.error("操作岗位时发生Playwright异常: {}", e.getMessage());
-                        // 继续下一个岗位
-                        continue;
-                    }
-                } catch (Exception e) {
-                    log.error("操作岗位时发生未知异常: {}", e.getMessage(), e);
-                    // 继续下一个岗位
-                    continue;
-                }
+                resumeSubmission(page, keyword, job);
+                postCount++;
             }
             log.info("【{}】岗位已投递完毕！已投递岗位数量:{}", keyword, postCount);
         }
@@ -450,135 +411,120 @@ public class Boss {
 
     @SneakyThrows
     private static void resumeSubmission(com.microsoft.playwright.Page page, String keyword, Job job) {
-        com.microsoft.playwright.Page detailPage = null;
-        try {
+        PlaywrightUtil.sleep(1);
+
+        // 1. 查找“查看更多信息”按钮（必须存在且新开页）
+        Locator moreInfoBtn = page.locator("a.more-job-btn");
+        if (moreInfoBtn.count() == 0) {
+            log.warn("未找到“查看更多信息”按钮，跳过...");
+            return;
+        }
+        // 强制用js新开tab
+        String href = moreInfoBtn.first().getAttribute("href");
+        if (href == null || !href.startsWith("/job_detail/")) {
+            log.warn("未获取到岗位详情链接，跳过...");
+            return;
+        }
+        String detailUrl = "https://www.zhipin.com" + href;
+
+        // 2. 新开详情页
+        com.microsoft.playwright.Page detailPage = page.context().newPage();
+        detailPage.navigate(detailUrl);
+        PlaywrightUtil.sleep(1); // 页面加载
+
+        // 3. 查找“立即沟通”按钮
+        Locator chatBtn = detailPage.locator("a.btn-startchat, a.op-btn-chat");
+        boolean foundChatBtn = false;
+        for (int i = 0; i < 5; i++) {
+            if (chatBtn.count() > 0 && (chatBtn.first().textContent().contains("立即沟通"))) {
+                foundChatBtn = true;
+                break;
+            }
             PlaywrightUtil.sleep(1);
+        }
+        if (!foundChatBtn) {
+            log.warn("未找到立即沟通按钮，跳过岗位: {}", job.getJobName());
+            detailPage.close();
+            return;
+        }
+        chatBtn.first().click();
+        PlaywrightUtil.sleep(1);
 
-            // 1. 查找"查看更多信息"按钮（必须存在且新开页）
-            Locator moreInfoBtn = page.locator("a.more-job-btn");
-            if (moreInfoBtn.count() == 0) {
-                log.warn("未找到\"查看更多信息\"按钮，跳过...");
-                return;
+        // 4. 等待聊天输入框
+        Locator inputLocator = detailPage.locator("div#chat-input.chat-input[contenteditable='true'], textarea.input-area");
+        boolean inputReady = false;
+        for (int i = 0; i < 10; i++) {
+            if (inputLocator.count() > 0 && inputLocator.first().isVisible()) {
+                inputReady = true;
+                break;
             }
-            // 强制用js新开tab
-            String href = moreInfoBtn.first().getAttribute("href");
-            if (href == null || !href.startsWith("/job_detail/")) {
-                log.warn("未获取到岗位详情链接，跳过...");
-                return;
-            }
-            String detailUrl = "https://www.zhipin.com" + href;
-
-            // 2. 新开详情页
-            detailPage = page.context().newPage();
-            detailPage.navigate(detailUrl);
-            PlaywrightUtil.sleep(1); // 页面加载
-
-            // 3. 查找"立即沟通"按钮
-            Locator chatBtn = detailPage.locator("a.btn-startchat, a.op-btn-chat");
-            boolean foundChatBtn = false;
-            for (int i = 0; i < 5; i++) {
-                if (chatBtn.count() > 0 && (chatBtn.first().textContent().contains("立即沟通"))) {
-                    foundChatBtn = true;
-                    break;
-                }
-                PlaywrightUtil.sleep(1);
-            }
-            if (!foundChatBtn) {
-                log.warn("未找到立即沟通按钮，跳过岗位: {}", job.getJobName());
-                return;
-            }
-            chatBtn.first().click();
             PlaywrightUtil.sleep(1);
+        }
+        if (!inputReady) {
+            log.warn("聊天输入框未出现，跳过: {}", job.getJobName());
+            detailPage.close();
+            return;
+        }
 
-            // 4. 等待聊天输入框
-            Locator inputLocator = detailPage.locator("div#chat-input.chat-input[contenteditable='true'], textarea.input-area");
-            boolean inputReady = false;
-            for (int i = 0; i < 10; i++) {
-                if (inputLocator.count() > 0 && inputLocator.first().isVisible()) {
-                    inputReady = true;
-                    break;
-                }
-                PlaywrightUtil.sleep(1);
+        // 5. AI智能生成打招呼语
+        AiFilter aiResult = null;
+        if (config.getEnableAI()) {
+            String jd = job.getJobInfo();
+            if (jd != null && !jd.isEmpty()) {
+                aiResult = checkJob(keyword, job.getJobName(), jd);
             }
-            if (!inputReady) {
-                log.warn("聊天输入框未出现，跳过: {}", job.getJobName());
-                return;
-            }
+        }
+        String sayHi = config.getSayHi().replaceAll("[\\r\\n]", "");
+        String message = (aiResult != null && aiResult.getResult() && isValidString(aiResult.getMessage()))
+                ? aiResult.getMessage() : sayHi;
 
-            // 5. AI智能生成打招呼语
-            AiFilter aiResult = null;
-            if (config.getEnableAI()) {
-                String jd = job.getJobInfo();
-                if (jd != null && !jd.isEmpty()) {
-                    aiResult = checkJob(keyword, job.getJobName(), jd);
-                }
-            }
-            String sayHi = config.getSayHi().replaceAll("[\\r\\n]", "");
-            String message = (aiResult != null && aiResult.getResult() && isValidString(aiResult.getMessage()))
-                    ? aiResult.getMessage() : sayHi;
+        // 6. 输入打招呼语
+        Locator input = inputLocator.first();
+        input.click();
+        if (input.evaluate("el => el.tagName.toLowerCase()") instanceof String tag && tag.equals("textarea")) {
+            input.fill(message);
+        } else {
+            input.evaluate("(el, msg) => el.innerText = msg", message);
+        }
 
-            // 6. 输入打招呼语
-            Locator input = inputLocator.first();
-            input.click();
-            if (input.evaluate("el => el.tagName.toLowerCase()") instanceof String tag && tag.equals("textarea")) {
-                input.fill(message);
-            } else {
-                input.evaluate("(el, msg) => el.innerText = msg", message);
-            }
-
-            // 7. 发送图片简历（可选）
-            boolean imgResume = false;
-            if (config.getSendImgResume()) {
-                try {
-                    URL resourceUrl = Boss.class.getResource("/resume.jpg");
-                    if (resourceUrl != null) {
-                        File imageFile = new File(resourceUrl.toURI());
-                        Locator fileInput = detailPage.locator("//div[@aria-label='发送图片']//input[@type='file']");
-                        if (fileInput.count() > 0) {
-                            fileInput.setInputFiles(imageFile.toPath());
-                            imgResume = true;
-                        }
+        // 7. 发送图片简历（可选）
+        boolean imgResume = false;
+        if (config.getSendImgResume()) {
+            try {
+                URL resourceUrl = Boss.class.getResource("/resume.jpg");
+                if (resourceUrl != null) {
+                    File imageFile = new File(resourceUrl.toURI());
+                    Locator fileInput = detailPage.locator("//div[@aria-label='发送图片']//input[@type='file']");
+                    if (fileInput.count() > 0) {
+                        fileInput.setInputFiles(imageFile.toPath());
+                        imgResume = true;
                     }
-                } catch (Exception e) {
-                    log.error("发送图片简历失败: {}", e.getMessage());
                 }
+            } catch (Exception e) {
+                log.error("发送图片简历失败: {}", e.getMessage());
             }
+        }
 
-            // 8. 点击发送按钮（div.send-message 或 button.btn-send）
-            Locator sendBtn = detailPage.locator("div.send-message, button[type='send'].btn-send, button.btn-send");
-            boolean sendSuccess = false;
-            if (sendBtn.count() > 0) {
-                sendBtn.first().click();
-                PlaywrightUtil.sleep(1);
-                sendSuccess = true;
-            } else {
-                log.warn("未找到发送按钮，自动跳过！岗位：{}", job.getJobName());
-            }
-
-            log.info("投递完成 | 岗位：{} | 招呼语：{} | 图片简历：{}", job.getJobName(), message, imgResume ? "已发送" : "未发送");
-
-            // 9. 成功投递加入结果
-            if (sendSuccess) {
-                resultList.add(job);
-            }
-        } catch (com.microsoft.playwright.PlaywrightException e) {
-            if (e.getMessage().contains("Target page, context or browser has been closed")) {
-                log.error("浏览器页面已关闭，无法继续操作岗位: {}", job.getJobName());
-            } else {
-                log.error("操作岗位时发生Playwright异常: {}", e.getMessage(), e);
-            }
-        } catch (Exception e) {
-            log.error("操作岗位时发生未知异常: {}", e.getMessage(), e);
-        } finally {
-            // 确保详情页被关闭
-            if (detailPage != null && !detailPage.isClosed()) {
-                try {
-                    detailPage.close();
-                } catch (Exception e) {
-                    log.warn("关闭详情页时发生异常: {}", e.getMessage());
-                }
-            }
+        // 8. 点击发送按钮（div.send-message 或 button.btn-send）
+        Locator sendBtn = detailPage.locator("div.send-message, button[type='send'].btn-send, button.btn-send");
+        boolean sendSuccess = false;
+        if (sendBtn.count() > 0) {
+            sendBtn.first().click();
             PlaywrightUtil.sleep(1);
+            sendSuccess = true;
+        } else {
+            log.warn("未找到发送按钮，自动跳过！岗位：{}", job.getJobName());
+        }
+
+        log.info("投递完成 | 岗位：{} | 招呼语：{} | 图片简历：{}", job.getJobName(), message, imgResume ? "已发送" : "未发送");
+
+        // 9. 关闭详情页，回到主页面
+        detailPage.close();
+        PlaywrightUtil.sleep(1);
+
+        // 10. 成功投递加入结果
+        if (sendSuccess) {
+            resultList.add(job);
         }
     }
 
@@ -776,18 +722,11 @@ public class Boss {
     }
 
     private static AiFilter checkJob(String keyword, String jobName, String jd) {
-        try {
-            AiConfig aiConfig = AiConfig.init();
-            String requestMessage = String.format(aiConfig.getPrompt(), aiConfig.getIntroduce(), keyword, jobName, jd,
-                    config.getSayHi());
-            log.info("开始AI岗位匹配检测 | 关键词: {} | 岗位名称: {}", keyword, jobName);
-            String result = AiService.sendRequest(requestMessage);
-            log.info("AI检测结果: {}", result);
-            return result.contains("false") ? new AiFilter(false) : new AiFilter(true, result);
-        } catch (Exception e) {
-            log.error("AI岗位检测异常: {}", e.getMessage(), e);
-            return new AiFilter(false);
-        }
+        AiConfig aiConfig = AiConfig.init();
+        String requestMessage = String.format(aiConfig.getPrompt(), aiConfig.getIntroduce(), keyword, jobName, jd,
+                config.getSayHi());
+        String result = AiService.sendRequest(requestMessage);
+        return result.contains("false") ? new AiFilter(false) : new AiFilter(true, result);
     }
 
     private static Integer[] parseSalaryRange(String salaryText) {

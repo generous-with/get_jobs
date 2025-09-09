@@ -40,6 +40,7 @@ public class AiService {
         
         log.info("开始调用AI服务，使用模型: {}", MODEL);
         log.debug("请求内容: {}", content);
+        log.info("生成的提示词: \n{}", content);
         
         // 设置超时时间，单位：秒
         int timeoutInSeconds = 60;  // 你可以修改这个变量来设置超时时间

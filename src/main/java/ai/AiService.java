@@ -24,7 +24,7 @@ import java.util.concurrent.*;
 public class AiService {
 
     private static final Dotenv dotenv = Dotenv.configure()
-            .directory("/src/main/resources")
+            .directory("./src/main/resources")
             .ignoreIfMissing()
             .load();
     private static final String BASE_URL = (dotenv.get("BASE_URL") != null ? dotenv.get("BASE_URL") : "https://api.deepseek.com") + "/v1/chat/completions";

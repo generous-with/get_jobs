@@ -1,5 +1,4 @@
-#\u6C42\u804C\u5E94\u7528\u7A0B\u5E8F\u914D\u7F6E
-#Tue Sep 09 17:39:16 CST 2025
+#Tue Sep 09 17:23:39 CST 2025
 ai.apiKey=
 ai.baseUrl=https\://api.deepseek.com
 ai.introduce=你是一个专业的求职顾问，擅长根据职位描述(JD)和求职者简历内容，撰写个性化的求职招呼语。
@@ -16,7 +15,7 @@ boss.filterDeadHR=true
 boss.industry=不限
 boss.jobType=不限
 boss.keywords=PHP,大模型,Golang,Java,高级工程师,后端,服务端,web,IT,主管,技术总监,技术经理
-boss.salary=25-30K
+boss.salary=20-50K
 boss.sayHi=您好,我有游戏行业工作经验,还有AIGC大模型、PHP,Java,Python,Golang和运维的相关经验,希望应聘这个岗位,期待可以与您进一步沟通,谢谢！
 boss.scale=不限
 boss.sendImgResume=false

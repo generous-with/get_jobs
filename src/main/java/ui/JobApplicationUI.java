@@ -977,7 +977,7 @@ public class JobApplicationUI extends JFrame {
     
     private void loadConfig() {
         appendLog("开始加载配置...");
-        loadDefaultConfigFromYaml();
+        // 优先从 app_config.properties 加载参数
         loadAppConfig();
         appendLog("配置加载完成");
     }
@@ -2122,109 +2122,109 @@ public class JobApplicationUI extends JFrame {
     
     private void loadAppConfig() {
         File configFile = new File(CONFIG_FILE);
-        if (!configFile.exists()) {
-            appendLog("配置文件 " + CONFIG_FILE + " 不存在，将使用默认配置");
-            return;
-        }
-        
         Properties props = new Properties();
         
-        try (InputStream input = new FileInputStream(configFile)) {
-            // 使用UTF-8编码加载配置文件，避免中文乱码
-            props.load(new InputStreamReader(input, "UTF-8"));
-            
-            // 加载Boss平台参数
-            bossDebuggerCheckBox.setSelected(Boolean.parseBoolean(props.getProperty("boss.debugger", "false")));
-            bossSayHiArea.setText(props.getProperty("boss.sayHi", ""));
-            bossKeywordsField.setText(props.getProperty("boss.keywords", ""));
-            bossCityCodeField.setText(props.getProperty("boss.cityCode", ""));
-            bossExperienceField.setText(props.getProperty("boss.experience", ""));
-            bossJobTypeField.setText(props.getProperty("boss.jobType", ""));
-            bossSalaryField.setText(props.getProperty("boss.salary", ""));
-            bossWaitTimeField.setText(props.getProperty("boss.waitTime", "30"));
-            bossFilterDeadHRCheckBox.setSelected(Boolean.parseBoolean(props.getProperty("boss.filterDeadHR", "false")));
-            
-            // 加载Boss平台新增参数
-            bossIndustryField.setText(props.getProperty("boss.industry", "不限"));
-            bossDegreeField.setText(props.getProperty("boss.degree", "不限"));
-            bossScaleField.setText(props.getProperty("boss.scale", "不限"));
-            bossStageField.setText(props.getProperty("boss.stage", "不限"));
-            bossExpectedSalaryField.setText(props.getProperty("boss.expectedSalary", "20,30"));
-            bossEnableAICheckBox.setSelected(Boolean.parseBoolean(props.getProperty("boss.enableAI", "true")));
-            bossSendImgResumeCheckBox.setSelected(Boolean.parseBoolean(props.getProperty("boss.sendImgResume", "false")));
-            bossDeadStatusField.setText(props.getProperty("boss.deadStatus", "2周内活跃,本月活跃,2月内活跃"));
-            
-            // 加载51job平台参数
-            job51DebuggerCheckBox.setSelected(Boolean.parseBoolean(props.getProperty("job51.debugger", "false")));
-            job51SayHiArea.setText(props.getProperty("job51.sayHi", ""));
-            job51KeywordsField.setText(props.getProperty("job51.keywords", ""));
-            job51CityCodeField.setText(props.getProperty("job51.cityCode", ""));
-            job51ExperienceField.setText(props.getProperty("job51.experience", ""));
-            job51JobTypeField.setText(props.getProperty("job51.jobType", ""));
-            job51SalaryField.setText(props.getProperty("job51.salary", ""));
-            job51WaitTimeField.setText(props.getProperty("job51.waitTime", "30"));
-            job51FilterDeadHRCheckBox.setSelected(Boolean.parseBoolean(props.getProperty("job51.filterDeadHR", "false")));
-            
-            // 加载51job平台新增参数
-            job51JobAreaField.setText(props.getProperty("job51.jobArea", "厦门"));
-            
-            // 加载Lagou平台参数
-            lagouDebuggerCheckBox.setSelected(Boolean.parseBoolean(props.getProperty("lagou.debugger", "false")));
-            lagouSayHiArea.setText(props.getProperty("lagou.sayHi", ""));
-            lagouKeywordsField.setText(props.getProperty("lagou.keywords", ""));
-            lagouCityCodeField.setText(props.getProperty("lagou.cityCode", ""));
-            lagouExperienceField.setText(props.getProperty("lagou.experience", ""));
-            lagouJobTypeField.setText(props.getProperty("lagou.jobType", ""));
-            lagouSalaryField.setText(props.getProperty("lagou.salary", ""));
-            lagouWaitTimeField.setText(props.getProperty("lagou.waitTime", "30"));
-            lagouFilterDeadHRCheckBox.setSelected(Boolean.parseBoolean(props.getProperty("lagou.filterDeadHR", "false")));
-            
-            // 加载Lagou平台新增参数
-            lagouScaleField.setText(props.getProperty("lagou.scale", "不限"));
-            lagouGjField.setText(props.getProperty("lagou.gj", "在校/应届,3年及以下"));
-            
-            // 加载Liepin平台参数
-            liepinDebuggerCheckBox.setSelected(Boolean.parseBoolean(props.getProperty("liepin.debugger", "false")));
-            liepinSayHiArea.setText(props.getProperty("liepin.sayHi", ""));
-            liepinKeywordsField.setText(props.getProperty("liepin.keywords", ""));
-            liepinCityCodeField.setText(props.getProperty("liepin.cityCode", ""));
-            liepinExperienceField.setText(props.getProperty("liepin.experience", ""));
-            liepinJobTypeField.setText(props.getProperty("liepin.jobType", ""));
-            liepinSalaryField.setText(props.getProperty("liepin.salary", ""));
-            liepinWaitTimeField.setText(props.getProperty("liepin.waitTime", "30"));
-            liepinFilterDeadHRCheckBox.setSelected(Boolean.parseBoolean(props.getProperty("liepin.filterDeadHR", "false")));
-            
-            // 加载Liepin平台新增参数
-            liepinPubTimeField.setText(props.getProperty("liepin.pubTime", "30"));
-            
-            // 加载Zhilian平台参数
-            zhilianDebuggerCheckBox.setSelected(Boolean.parseBoolean(props.getProperty("zhilian.debugger", "false")));
-            zhilianSayHiArea.setText(props.getProperty("zhilian.sayHi", ""));
-            zhilianKeywordsField.setText(props.getProperty("zhilian.keywords", ""));
-            zhilianCityCodeField.setText(props.getProperty("zhilian.cityCode", ""));
-            zhilianExperienceField.setText(props.getProperty("zhilian.experience", ""));
-            zhilianJobTypeField.setText(props.getProperty("zhilian.jobType", ""));
-            zhilianSalaryField.setText(props.getProperty("zhilian.salary", ""));
-            zhilianWaitTimeField.setText(props.getProperty("zhilian.waitTime", "30"));
-            zhilianFilterDeadHRCheckBox.setSelected(Boolean.parseBoolean(props.getProperty("zhilian.filterDeadHR", "false")));
-            
-            // 加载AI参数
-            baseUrlField.setText(props.getProperty("ai.baseUrl", "https://api.deepseek.com"));
-            apiKeyField.setText(props.getProperty("ai.apiKey", ""));
-            modelField.setText(props.getProperty("ai.model", "deepseek-chat"));
-            introduceArea.setText(props.getProperty("ai.introduce", ""));
-            promptArea.setText(props.getProperty("ai.prompt", ""));
-            
-            // 加载Bot消息推送配置
-            botSendCheckBox.setSelected(Boolean.parseBoolean(props.getProperty("bot.send", "false")));
-            botBarkSendCheckBox.setSelected(Boolean.parseBoolean(props.getProperty("bot.barkSend", "false")));
-            botHookUrlField.setText(props.getProperty("bot.hookUrl", ""));
-            botBarkUrlField.setText(props.getProperty("bot.barkUrl", ""));
-            
-            appendLog("配置已从 " + CONFIG_FILE + " 加载");
-        } catch (IOException e) {
-            appendLog("加载配置时发生错误: " + e.getMessage() + "，使用默认配置");
+        if (configFile.exists()) {
+            try (InputStream input = new FileInputStream(configFile)) {
+                // 使用UTF-8编码加载配置文件，避免中文乱码
+                props.load(new InputStreamReader(input, "UTF-8"));
+                appendLog("配置已从 " + CONFIG_FILE + " 加载");
+            } catch (IOException e) {
+                appendLog("加载配置时发生错误: " + e.getMessage() + "，使用默认配置");
+            }
+        } else {
+            appendLog("配置文件 " + CONFIG_FILE + " 不存在，使用默认配置");
         }
+        
+        // 加载Boss平台参数（带默认值）
+        bossDebuggerCheckBox.setSelected(Boolean.parseBoolean(props.getProperty("boss.debugger", "false")));
+        bossSayHiArea.setText(props.getProperty("boss.sayHi", "您好,我有多年工作经验,还有AIGC大模型、PHP、Java,Python,Golang和运维的相关经验,希望应聘这个岗位,期待可以与您进一步沟通,谢谢！"));
+        bossKeywordsField.setText(props.getProperty("boss.keywords", "PHP,大模型,Golang,Java,高级工程师,后端,服务端,web"));
+        bossCityCodeField.setText(props.getProperty("boss.cityCode", "厦门"));
+        bossExperienceField.setText(props.getProperty("boss.experience", "5-10年"));
+        bossJobTypeField.setText(props.getProperty("boss.jobType", "不限"));
+        bossSalaryField.setText(props.getProperty("boss.salary", "20-50K"));
+        bossWaitTimeField.setText(props.getProperty("boss.waitTime", "30"));
+        bossFilterDeadHRCheckBox.setSelected(Boolean.parseBoolean(props.getProperty("boss.filterDeadHR", "true")));
+        
+        // 加载Boss平台新增参数
+        bossIndustryField.setText(props.getProperty("boss.industry", "不限"));
+        bossDegreeField.setText(props.getProperty("boss.degree", "不限"));
+        bossScaleField.setText(props.getProperty("boss.scale", "不限"));
+        bossStageField.setText(props.getProperty("boss.stage", "不限"));
+        bossExpectedSalaryField.setText(props.getProperty("boss.expectedSalary", "20,30"));
+        bossEnableAICheckBox.setSelected(Boolean.parseBoolean(props.getProperty("boss.enableAI", "true")));
+        bossSendImgResumeCheckBox.setSelected(Boolean.parseBoolean(props.getProperty("boss.sendImgResume", "false")));
+        bossDeadStatusField.setText(props.getProperty("boss.deadStatus", "2周内活跃,本月活跃,2月内活跃"));
+        
+        // 加载51job平台参数
+        job51DebuggerCheckBox.setSelected(Boolean.parseBoolean(props.getProperty("job51.debugger", "false")));
+        job51SayHiArea.setText(props.getProperty("job51.sayHi", "您好,我有多年工作经验,还有AIGC大模型、PHP、Java,Python,Golang和运维的相关经验,希望应聘这个岗位,期待可以与您进一步沟通,谢谢！"));
+        job51KeywordsField.setText(props.getProperty("job51.keywords", "PHP,大模型,Golang,Java,高级工程师,后端,服务端,web"));
+        job51CityCodeField.setText(props.getProperty("job51.cityCode", "厦门"));
+        job51ExperienceField.setText(props.getProperty("job51.experience", "5-10年"));
+        job51JobTypeField.setText(props.getProperty("job51.jobType", "全职"));
+        job51SalaryField.setText(props.getProperty("job51.salary", "不限"));
+        job51WaitTimeField.setText(props.getProperty("job51.waitTime", "30"));
+        job51FilterDeadHRCheckBox.setSelected(Boolean.parseBoolean(props.getProperty("job51.filterDeadHR", "false")));
+        
+        // 加载51job平台新增参数
+        job51JobAreaField.setText(props.getProperty("job51.jobArea", "厦门"));
+        
+        // 加载Lagou平台参数
+        lagouDebuggerCheckBox.setSelected(Boolean.parseBoolean(props.getProperty("lagou.debugger", "false")));
+        lagouSayHiArea.setText(props.getProperty("lagou.sayHi", "您好,我有多年工作经验,还有AIGC大模型、PHP、Java,Python,Golang和运维的相关经验,希望应聘这个岗位,期待可以与您进一步沟通,谢谢！"));
+        lagouKeywordsField.setText(props.getProperty("lagou.keywords", "AI工程师,Java,Golang,Python,大模型,后端工程师"));
+        lagouCityCodeField.setText(props.getProperty("lagou.cityCode", "厦门"));
+        lagouExperienceField.setText(props.getProperty("lagou.experience", "5-10年"));
+        lagouJobTypeField.setText(props.getProperty("lagou.jobType", "全职"));
+        lagouSalaryField.setText(props.getProperty("lagou.salary", "不限"));
+        lagouWaitTimeField.setText(props.getProperty("lagou.waitTime", "30"));
+        lagouFilterDeadHRCheckBox.setSelected(Boolean.parseBoolean(props.getProperty("lagou.filterDeadHR", "false")));
+        
+        // 加载Lagou平台新增参数
+        lagouScaleField.setText(props.getProperty("lagou.scale", "不限"));
+        lagouGjField.setText(props.getProperty("lagou.gj", "在校/应届,3年及以下"));
+        
+        // 加载Liepin平台参数
+        liepinDebuggerCheckBox.setSelected(Boolean.parseBoolean(props.getProperty("liepin.debugger", "false")));
+        liepinSayHiArea.setText(props.getProperty("liepin.sayHi", "您好,我有多年工作经验,还有AIGC大模型、PHP、Java,Python,Golang和运维的相关经验,希望应聘这个岗位,期待可以与您进一步沟通,谢谢！"));
+        liepinKeywordsField.setText(props.getProperty("liepin.keywords", "Java,Python,Golang,大模型,高级工程师,后端工程师"));
+        liepinCityCodeField.setText(props.getProperty("liepin.cityCode", "厦门"));
+        liepinExperienceField.setText(props.getProperty("liepin.experience", "5-10年"));
+        liepinJobTypeField.setText(props.getProperty("liepin.jobType", "全职"));
+        liepinSalaryField.setText(props.getProperty("liepin.salary", "15$30"));
+        liepinWaitTimeField.setText(props.getProperty("liepin.waitTime", "30"));
+        liepinFilterDeadHRCheckBox.setSelected(Boolean.parseBoolean(props.getProperty("liepin.filterDeadHR", "false")));
+        
+        // 加载Liepin平台新增参数
+        liepinPubTimeField.setText(props.getProperty("liepin.pubTime", "30"));
+        
+        // 加载Zhilian平台参数
+        zhilianDebuggerCheckBox.setSelected(Boolean.parseBoolean(props.getProperty("zhilian.debugger", "false")));
+        zhilianSayHiArea.setText(props.getProperty("zhilian.sayHi", "您好,我有多年工作经验,还有AIGC大模型、PHP、Java,Python,Golang和运维的相关经验,希望应聘这个岗位,期待可以与您进一步沟通,谢谢！"));
+        zhilianKeywordsField.setText(props.getProperty("zhilian.keywords", "AI,Java,Python,Golang,大模型,高级工程师"));
+        zhilianCityCodeField.setText(props.getProperty("zhilian.cityCode", "厦门"));
+        zhilianExperienceField.setText(props.getProperty("zhilian.experience", "5-10年"));
+        zhilianJobTypeField.setText(props.getProperty("zhilian.jobType", "全职"));
+        zhilianSalaryField.setText(props.getProperty("zhilian.salary", "25001,35000"));
+        zhilianWaitTimeField.setText(props.getProperty("zhilian.waitTime", "30"));
+        zhilianFilterDeadHRCheckBox.setSelected(Boolean.parseBoolean(props.getProperty("zhilian.filterDeadHR", "false")));
+        
+        // 加载AI参数
+        baseUrlField.setText(props.getProperty("ai.baseUrl", "https://api.deepseek.com"));
+        apiKeyField.setText(props.getProperty("ai.apiKey", ""));
+        modelField.setText(props.getProperty("ai.model", "deepseek-chat"));
+        introduceArea.setText(props.getProperty("ai.introduce", "我熟练使用PHP Golang Java Python 语言进行开发，目前主要方向为AI开发，擅长MySQL、Oracle、PostgreSQL等关系型数据库以及Elasticsearch、MongoDB、Redis等非关系型数据库与中间件。熟悉Docker、Kubernetes等容器化技术，掌握WebSocket、Netty、MQTT等通信协议，拥有即时通讯系统的开发经验。熟练使用Thinkphp、Yii、Spring boot、Django ORM等ORM框架，熟练使用Python、Golang开发，具备机器学习、深度学习及大语言模型的开发与部署经验。此外，我熟悉前端开发，涉及Vue、React、Nginx配置及PHP框架应用，10年以上IT与团队管理建设及成功申报过高新技术企业，熟练应阿里云、腾讯云、华为云、AWS等公有云，在高并发请求与海量数量处理上有实际实践项目"));
+        promptArea.setText(props.getProperty("ai.prompt", "我目前在找工作,%s,我期望的的岗位方向是【%s】,目前我需要投递的岗位名称是【%s】,这个岗位的要求是【%s】,如果这个岗位和我的期望与经历基本符合，注意是基本符合，那么请帮我写一个给HR打招呼的文本发给我，如果这个岗位和我的期望经历完全不相干，直接返回false给我，注意只要返回我需要的内容即可，不要有其他的语气助词，重点要突出我和岗位的匹配度以及我的优势，我自己写的招呼语是：【%s】,你可以参照我自己写的根据岗位情况进行适当调整"));
+        
+        // 加载Bot消息推送配置
+        botSendCheckBox.setSelected(Boolean.parseBoolean(props.getProperty("bot.send", "false")));
+        botBarkSendCheckBox.setSelected(Boolean.parseBoolean(props.getProperty("bot.barkSend", "false")));
+        botHookUrlField.setText(props.getProperty("bot.hookUrl", ""));
+        botBarkUrlField.setText(props.getProperty("bot.barkUrl", ""));
+        
+        appendLog("配置已从 " + CONFIG_FILE + " 加载");
     }
     
     private void saveConfig() {
@@ -2388,7 +2388,7 @@ public class JobApplicationUI extends JFrame {
             content = updateYamlArrayValue(content, "boss", "degree", props.getProperty("boss.degree", "不限"));
             content = updateYamlArrayValue(content, "boss", "scale", props.getProperty("boss.scale", "不限"));
             content = updateYamlArrayValue(content, "boss", "stage", props.getProperty("boss.stage", "不限"));
-            content = updateYamlArrayValue(content, "boss", "expectedSalary", props.getProperty("boss.expectedSalary", "20,30"));
+            content = updateYamlNumericArrayValue(content, "boss", "expectedSalary", props.getProperty("boss.expectedSalary", "20,30"));
             content = updateYamlValue(content, "boss", "enableAI", props.getProperty("boss.enableAI", "true"));
             content = updateYamlValue(content, "boss", "sendImgResume", props.getProperty("boss.sendImgResume", "false"));
             content = updateYamlArrayValue(content, "boss", "deadStatus", props.getProperty("boss.deadStatus", "2周内活跃,本月活跃,2月内活跃"));
@@ -2437,9 +2437,29 @@ public class JobApplicationUI extends JFrame {
      * 更新YAML文件中的单个值
      */
     private String updateYamlValue(String content, String section, String key, String value) {
-        // 正则表达式匹配模式: section:\n  key: oldValue
-        String pattern = "(" + section + ":[\\s\\S]*?\\n\\s+" + key + ":\\s*)([^\\n]*)";        
-        return content.replaceAll(pattern, "$1" + value);
+        try {
+            // 转义特殊字符以防止正则表达式错误
+            String escapedValue = value.replace("$", "\\$");
+            
+            // 正则表达式匹配模式: section:\n  key: oldValue
+            String pattern = "(" + section + ":[\\s\\S]*?\\n\\s+" + key + ":\\s*)([^\\n]*)";
+            
+            appendLog("调试: 尝试更新 " + section + "." + key + " = " + value);
+            
+            // 检查是否匹配到
+            if (content.matches("[\\s\\S]*" + pattern + "[\\s\\S]*")) {
+                String result = content.replaceAll(pattern, "$1" + escapedValue);
+                appendLog("成功更新: " + section + "." + key);
+                return result;
+            } else {
+                appendLog("警告: 未找到 " + section + "." + key + " 参数在config.yaml中");
+                return content;
+            }
+        } catch (Exception e) {
+            appendLog("更新 " + section + "." + key + " 时发生错误: " + e.getMessage());
+            e.printStackTrace();
+            return content;
+        }
     }
     
     /**
@@ -2450,18 +2470,52 @@ public class JobApplicationUI extends JFrame {
             return content;
         }
         
-        // 将逗号分隔的字符串转换为YAML数组格式
-        String[] items = value.split(",");
-        StringBuilder yamlArray = new StringBuilder("[ ");
-        for (int i = 0; i < items.length; i++) {
-            if (i > 0) yamlArray.append(", ");
-            yamlArray.append("\"").append(items[i].trim()).append("\"");
+        try {
+            // 将逗号分隔的字符串转换为YAML数组格式 - 增强版
+            String[] items = value.split(",");
+            StringBuilder yamlArray = new StringBuilder("[ ");
+            
+            for (int i = 0; i < items.length; i++) {
+                if (i > 0) yamlArray.append(", ");
+                
+                String item = items[i].trim();
+                
+                // 检查是否为纯数字（针对expectedSalary等数值数组）
+                if (isNumericValue(item)) {
+                    // 数值不加引号
+                    yamlArray.append(item);
+                } else {
+                    // 对字符串的引号处理：如果已经有引号则不再加，否则添加
+                    if (item.startsWith("\"") && item.endsWith("\"")) {
+                        // 已经有引号，直接使用
+                        yamlArray.append(item);
+                    } else {
+                        // 没有引号，添加引号
+                        yamlArray.append("\"").append(item).append("\"");
+                    }
+                }
+            }
+            yamlArray.append(" ]");
+            
+            // 正则表达式匹配数组模式
+            String pattern = "(" + section + ":[\\s\\S]*?\\n\\s+" + key + ":\\s*)([^\\n]*)";
+            
+            appendLog("调试: 尝试更新 " + section + "." + key + " 数组 = " + value);
+            
+            // 检查是否匹配到
+            if (content.matches("[\\s\\S]*" + pattern + "[\\s\\S]*")) {
+                String result = content.replaceAll(pattern, "$1" + yamlArray.toString());
+                appendLog("成功更新: " + section + "." + key + " 数组");
+                return result;
+            } else {
+                appendLog("警告: 未找到 " + section + "." + key + " 参数在config.yaml中");
+                return content;
+            }
+        } catch (Exception e) {
+            appendLog("更新 " + section + "." + key + " 数组时发生错误: " + e.getMessage());
+            e.printStackTrace();
+            return content;
         }
-        yamlArray.append(" ]");
-        
-        // 正则表达式匹配数组模式
-        String pattern = "(" + section + ":[\\s\\S]*?\\n\\s+" + key + ":\\s*)([^\\n]*)";        
-        return content.replaceAll(pattern, "$1" + yamlArray.toString());
     }
     
     /**
@@ -2472,6 +2526,59 @@ public class JobApplicationUI extends JFrame {
             return "\"\"";
         }
         return "\"" + value + "\"";
+    }
+    
+    /**
+     * 检查字符串是否为纯数字
+     */
+    private boolean isNumericValue(String value) {
+        if (value == null || value.trim().isEmpty()) {
+            return false;
+        }
+        try {
+            Double.parseDouble(value.trim());
+            return true;
+        } catch (NumberFormatException e) {
+            return false;
+        }
+    }
+    
+    /**
+     * 更新YAML文件中的数值数组（不加引号）
+     */
+    private String updateYamlNumericArrayValue(String content, String section, String key, String value) {
+        if (value == null || value.trim().isEmpty()) {
+            return content;
+        }
+        
+        try {
+            // 将逗号分隔的数值转换为YAML数组格式
+            String[] items = value.split(",");
+            StringBuilder yamlArray = new StringBuilder("[ ");
+            
+            for (int i = 0; i < items.length; i++) {
+                if (i > 0) yamlArray.append(", ");
+                String item = items[i].trim();
+                // 数值数组不加引号
+                yamlArray.append(item);
+            }
+            
+            yamlArray.append(" ]");
+            
+            // 正则表达式匹配数组模式
+            String pattern = "(" + section + ":[\\s\\S]*?\\n\\s+" + key + ":\\s*)([^\\n]*)";
+            
+            // 检查是否匹配到
+            if (content.matches("[\\s\\S]*" + pattern + "[\\s\\S]*")) {
+                return content.replaceAll(pattern, "$1" + yamlArray.toString());
+            } else {
+                appendLog("警告: 未找到 " + section + "." + key + " 参数在config.yaml中");
+                return content;
+            }
+        } catch (Exception e) {
+            appendLog("更新 " + section + "." + key + " 数值数组时发生错误: " + e.getMessage());
+            return content;
+        }
     }
     
     public static void main(String[] args) {

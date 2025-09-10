@@ -39,3 +39,4 @@ cookie.json
 .env
 chromedriver
 *.jpg
+TestQuoteFix.class

@@ -392,24 +392,17 @@ public class JobApplicationUI extends JFrame {
         
         int row = 0;
         
-        // 第一行：开发者模式 和 过滤不活跃HR （两列布局）
-        gbc.gridx = 0; gbc.gridy = row; gbc.gridwidth = 1;
-        contentPanel.add(bossDebuggerCheckBox, gbc);
-        gbc.gridx = 1;
-        contentPanel.add(bossFilterDeadHRCheckBox, gbc);
-        row++;
-        
-        // 第二行：打招呼语 （跨两列）
+        // 第一行：打招呼语 （跨两列）
         gbc.gridx = 0; gbc.gridy = row; gbc.gridwidth = 1;
         contentPanel.add(new JLabel("打招呼语:"), gbc);
-        gbc.gridx = 1; gbc.gridwidth = 2; gbc.fill = GridBagConstraints.BOTH; gbc.weightx = 1.0;
+        gbc.gridx = 1; gbc.gridwidth = 3; gbc.fill = GridBagConstraints.BOTH; gbc.weightx = 1.0;
         JScrollPane sayHiScroll = new JScrollPane(bossSayHiArea);
         sayHiScroll.setPreferredSize(new Dimension(0, 80));
         contentPanel.add(sayHiScroll, gbc);
-        gbc.fill = GridBagConstraints.NONE; gbc.weightx = 0;
+        gbc.fill = GridBagConstraints.NONE; gbc.weightx = 0; gbc.gridwidth = 1;
         row++;
         
-        // 第三行：搜索关键词 和 城市代码
+        // 第二行：搜索关键词 和 城市代码
         gbc.gridx = 0; gbc.gridy = row; gbc.gridwidth = 1;
         contentPanel.add(new JLabel("搜索关键词:"), gbc);
         gbc.gridx = 1; gbc.fill = GridBagConstraints.HORIZONTAL; gbc.weightx = 0.5;
@@ -421,7 +414,7 @@ public class JobApplicationUI extends JFrame {
         gbc.fill = GridBagConstraints.NONE; gbc.weightx = 0;
         row++;
         
-        // 第四行：工作经验 和 求职类型
+        // 第三行：工作经验 和 求职类型
         gbc.gridx = 0; gbc.gridy = row; gbc.gridwidth = 1;
         contentPanel.add(new JLabel("工作经验:"), gbc);
         gbc.gridx = 1; gbc.fill = GridBagConstraints.HORIZONTAL; gbc.weightx = 0.5;
@@ -433,7 +426,7 @@ public class JobApplicationUI extends JFrame {
         gbc.fill = GridBagConstraints.NONE; gbc.weightx = 0;
         row++;
         
-        // 第五行：期望薪资 和 等待时间
+        // 第四行：期望薪资 和 等待时间
         gbc.gridx = 0; gbc.gridy = row; gbc.gridwidth = 1;
         contentPanel.add(new JLabel("期望薪资:"), gbc);
         gbc.gridx = 1; gbc.fill = GridBagConstraints.HORIZONTAL; gbc.weightx = 0.5;
@@ -445,7 +438,7 @@ public class JobApplicationUI extends JFrame {
         gbc.fill = GridBagConstraints.NONE; gbc.weightx = 0;
         row++;
         
-        // 第六行：公司行业 和 学历要求
+        // 第五行：公司行业 和 学历要求
         gbc.gridx = 0; gbc.gridy = row; gbc.gridwidth = 1;
         contentPanel.add(new JLabel("公司行业:"), gbc);
         gbc.gridx = 1; gbc.fill = GridBagConstraints.HORIZONTAL; gbc.weightx = 0.5;
@@ -457,7 +450,7 @@ public class JobApplicationUI extends JFrame {
         gbc.fill = GridBagConstraints.NONE; gbc.weightx = 0;
         row++;
         
-        // 第七行：公司规模 和 融资阶段
+        // 第六行：公司规模 和 融资阶段
         gbc.gridx = 0; gbc.gridy = row; gbc.gridwidth = 1;
         contentPanel.add(new JLabel("公司规模:"), gbc);
         gbc.gridx = 1; gbc.fill = GridBagConstraints.HORIZONTAL; gbc.weightx = 0.5;
@@ -469,7 +462,7 @@ public class JobApplicationUI extends JFrame {
         gbc.fill = GridBagConstraints.NONE; gbc.weightx = 0;
         row++;
         
-        // 第八行：期望薪资范围
+        // 第七行：期望薪资范围
         gbc.gridx = 0; gbc.gridy = row; gbc.gridwidth = 1;
         contentPanel.add(new JLabel("期望薪资范围:"), gbc);
         gbc.gridx = 1; gbc.fill = GridBagConstraints.HORIZONTAL; gbc.weightx = 1.0;
@@ -477,18 +470,31 @@ public class JobApplicationUI extends JFrame {
         gbc.fill = GridBagConstraints.NONE; gbc.weightx = 0;
         row++;
         
-        // 第九行：AI功能 和 图片简历
-        gbc.gridx = 0; gbc.gridy = row; gbc.gridwidth = 1;
-        contentPanel.add(bossEnableAICheckBox, gbc);
-        gbc.gridx = 1;
-        contentPanel.add(bossSendImgResumeCheckBox, gbc);
-        row++;
-        
-        // 第十行：DR状态过滤 （跨列）
+        // 第八行：DR状态过滤 （跨列）
         gbc.gridx = 0; gbc.gridy = row; gbc.gridwidth = 1;
         contentPanel.add(new JLabel("HR状态过滤:"), gbc);
         gbc.gridx = 1; gbc.gridwidth = 3; gbc.fill = GridBagConstraints.HORIZONTAL; gbc.weightx = 1.0;
         contentPanel.add(bossDeadStatusField, gbc);
+        gbc.fill = GridBagConstraints.NONE; gbc.weightx = 0; gbc.gridwidth = 1;
+        row++;
+        
+        // 第九行：四个选择框并排（四等分一行）：开发者模式、过滤不活跃HR、开启AI功能、发送图片简历
+        gbc.gridx = 0; gbc.gridy = row; gbc.gridwidth = 1; gbc.fill = GridBagConstraints.HORIZONTAL; gbc.weightx = 1.0;
+        gbc.insets = new Insets(5, 5, 5, 5); // 确保有合适的间距
+        
+        // 创建一个子面板来容纳四个选择框，确保均匀分布
+        JPanel checkBoxPanel = new JPanel(new GridLayout(1, 4, 5, 0)); // 1行4列，水平间距5
+        checkBoxPanel.add(bossDebuggerCheckBox);
+        checkBoxPanel.add(bossFilterDeadHRCheckBox);
+        checkBoxPanel.add(bossEnableAICheckBox);
+        checkBoxPanel.add(bossSendImgResumeCheckBox);
+        
+        gbc.gridwidth = 4; // 跨4列
+        contentPanel.add(checkBoxPanel, gbc);
+        
+        // 重置参数
+        gbc.fill = GridBagConstraints.NONE; gbc.weightx = 0; gbc.gridwidth = 1;
+        gbc.insets = new Insets(5, 5, 5, 5);
         
         // 添加滚动支持
         JScrollPane scrollPane = new JScrollPane(contentPanel);

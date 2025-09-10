@@ -104,6 +104,23 @@ public class BossConfig {
      */
     private List<String> deadStatus;
 
+    // 手动添加 getter 方法以解决 Lombok 编译问题
+    public List<Integer> getExpectedSalary() {
+        return expectedSalary;
+    }
+
+    public Boolean getFilterDeadHR() {
+        return filterDeadHR;
+    }
+
+    public List<String> getDeadStatus() {
+        return deadStatus;
+    }
+
+    public String getSayHi() {
+        return sayHi;
+    }
+
     @SneakyThrows
     public static BossConfig init() {
         BossConfig config = JobUtils.getConfig(BossConfig.class);

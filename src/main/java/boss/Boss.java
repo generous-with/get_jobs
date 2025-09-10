@@ -163,6 +163,13 @@ public class Boss {
                 // 薪资(原始)
                 String jobSalaryRaw = safeText(detailBox, "span.job-salary");
                 String jobSalary = decodeSalary(jobSalaryRaw);
+                
+                // 薪资过滤 - 检查岗位薪资是否符合预期
+                if (isSalaryNotExpected(jobSalary)) {
+                    log.info("薪资不符合预期，跳过岗位：{} | 薪资：{}", jobName, jobSalary);
+                    continue;
+                }
+                
                 // 城市/经验/学历
                 List<String> tags = safeAllText(detailBox, "ul[class*='tag-list'] > li");
                 // 标签 (暂时不使用)
